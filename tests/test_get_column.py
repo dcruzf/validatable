@@ -1,10 +1,31 @@
+import datetime as dt
+import enum
 import pathlib
+import uuid
 from decimal import Decimal
+from ipaddress import (
+    IPv4Address,
+    IPv4Interface,
+    IPv4Network,
+    IPv6Address,
+    IPv6Interface,
+    IPv6Network,
+)
 
+import pytest
 import sqlalchemy as sa
 from pydantic import (
+    UUID1,
+    UUID3,
+    UUID4,
+    UUID5,
     BaseModel,
+    EmailStr,
     Field,
+    IPvAnyAddress,
+    IPvAnyInterface,
+    IPvAnyNetwork,
+    NameEmail,
     conbytes,
     condecimal,
     confloat,
@@ -12,12 +33,24 @@ from pydantic import (
     constr,
 )
 
+from validatable.generic_types import GUID
 from validatable.util import get_column
+
+
+class CaseEnum(enum.Enum):
+    a: int = 1
+    b: int = 2
+    c: str = "c"
 
 
 class ModelCase(BaseModel):
 
     id: int = Field(sa_primary_key=True)
+    python_uuid: uuid.UUID
+    uuid1: UUID1
+    uuid3: UUID3
+    uuid4: UUID4
+    uuid5: UUID5
     python_int: int = 1
     con_int: conint(strict=True)
     python_float: float = 1.23
@@ -26,9 +59,26 @@ class ModelCase(BaseModel):
     con_decimal: condecimal(max_digits=10)
     python_str: str
     con_str: constr(max_length=10)
+    email_str: EmailStr
+    name_email: NameEmail
     python_bytes: bytes
     con_bytes: conbytes(max_length=10)
     python_path: pathlib.Path
+    ipv4: IPv4Address
+    ipv4i: IPv4Interface
+    ipv4n: IPv4Network
+    ipv6: IPv6Address
+    ipv6i: IPv6Interface
+    ipv6n: IPv6Network
+    ipvany: IPvAnyAddress
+    ipvanyi: IPvAnyInterface
+    ipvanyn: IPvAnyNetwork
+    dt_datetime: dt.datetime
+    dt_date: dt.date
+    dt_time: dt.time
+    dt_timedelta: dt.timedelta
+    enum_field: CaseEnum
+
     sa_type: Decimal = Field(sa_type=sa.DECIMAL(precision=10))
     sa_column: str = Field(
         sa_column=sa.Column(sa.String(255), nullable=False), max_length=255
@@ -42,7 +92,7 @@ def test_get_column_python_int():
     """
     python_int = ModelCase.__fields__.get("python_int")
     col = get_column(python_int)
-    assert col.type.__class__ == sa.BigInteger
+    assert col.type.__class__ == sa.Integer
 
 
 def test_get_column_con_int():
@@ -52,7 +102,7 @@ def test_get_column_con_int():
     """
     con_int = ModelCase.__fields__.get("con_int")
     col = get_column(con_int)
-    assert col.type.__class__ == sa.BigInteger
+    assert col.type.__class__ == sa.Integer
 
 
 def test_get_column_python_float():
@@ -116,6 +166,27 @@ def test_get_column_con_str():
     assert col.type.length == 10
 
 
+def test_get_column_email_str():
+    """
+    WHEN called with ConstrainedStringValue with max_length=10
+    THEN the SqlAlchemy type is String(10)
+    """
+    email_str = ModelCase.__fields__.get("email_str")
+    col = get_column(email_str)
+    assert col.type.__class__ == sa.String
+    assert col.type.length == 320
+
+
+def test_get_column_name_email():
+    """
+    WHEN called with ConstrainedStringValue with max_length=10
+    THEN the SqlAlchemy type is String(10)
+    """
+    name_email = ModelCase.__fields__.get("name_email")
+    col = get_column(name_email)
+    assert col.type.__class__ == sa.Text
+
+
 def test_get_column_python_bytes():
     """
     WHEN called with bytes
@@ -167,3 +238,74 @@ def test_get_column_sa_type():
     col = get_column(sa_type)
     assert col.type.__class__ == sa.DECIMAL
     assert col.type.precision == 10
+
+
+@pytest.mark.parametrize(
+    ("field", "length"),
+    (
+        (
+            ("ipv4", 31),
+            ("ipv4i", 31),
+            ("ipv4n", 31),
+            ("ipv6", 43),
+            ("ipv6i", 43),
+            ("ipv6n", 43),
+            ("ipvany", 43),
+            ("ipvanyi", 43),
+            ("ipvanyn", 43),
+        )
+    ),
+)
+def test_get_column_network_types(field: str, length: int):
+    """
+    WHEN called with networktype
+    THEN the SqlAlchemy type is String(length)
+    """
+    network_type = ModelCase.__fields__.get(field)
+    col = get_column(network_type)
+    assert col.type.__class__ == sa.String
+    assert col.type.length == length
+
+
+@pytest.mark.parametrize(
+    ("field", "sa_type"),
+    (
+        ("dt_datetime", sa.DateTime),
+        ("dt_date", sa.Date),
+        ("dt_time", sa.Time),
+        ("dt_timedelta", sa.Interval),
+    ),
+)
+def test_get_column_datetimes(field: str, sa_type):
+    """
+    WHEN called with datetime types
+    THEN get correct SqlAlchemy type
+    """
+    dt_field = ModelCase.__fields__.get(field)
+    col = get_column(dt_field)
+    assert col.type.__class__ == sa_type
+
+
+def test_get_column_enum():
+    """
+    WHEN called with enum.Enum
+    THEN returns correct SqlAlchemy type
+    """
+    field = ModelCase.__fields__.get("enum_field")
+    col = get_column(field)
+    assert col.type.__class__ == sa.Enum
+    assert col.type.python_type == CaseEnum
+
+
+@pytest.mark.parametrize(
+    "field", ("python_uuid", "uuid1", "uuid3", "uuid4", "uuid5")
+)
+def test_get_column_uuid(field: str):
+    """
+    WHEN called with UUID
+    THEN returns GUID
+    """
+    field = ModelCase.__fields__.get(field)
+    col = get_column(field)
+    assert col.type.__class__ == GUID
+    assert col.type.python_type == uuid.UUID

@@ -2,40 +2,17 @@ import datetime as dt
 import decimal
 import enum
 import ipaddress
+import numbers
 import pathlib
+import uuid
 
 import sqlalchemy as sa
+from pydantic import EmailStr, NameEmail
 from pydantic.fields import ModelField
-from pydantic.types import (
-    ConstrainedBytes,
-    ConstrainedDecimal,
-    ConstrainedFloat,
-    ConstrainedInt,
-    ConstrainedStr,
-)
+from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
+from pydantic.types import ConstrainedStr
 
-type_map = {
-    str: sa.String,
-    ConstrainedStr: sa.String,
-    float: sa.Float,
-    ConstrainedFloat: sa.Float,
-    bool: sa.Boolean,
-    int: sa.Integer,
-    ConstrainedInt: sa.Integer,
-    bytes: sa.LargeBinary,
-    ConstrainedBytes: sa.LargeBinary,
-    dt.datetime: sa.DateTime,
-    dt.date: sa.Date,
-    dt.timedelta: sa.Interval,
-    dt.time: sa.Time,
-    ConstrainedDecimal: sa.Numeric,
-    decimal.Decimal: sa.Numeric,
-    ipaddress.IPv4Address: sa.String(15),
-    ipaddress.IPv4Network: sa.String(31),
-    ipaddress.IPv6Address: sa.String(39),
-    ipaddress.IPv6Network: sa.String(43),
-    pathlib.Path: sa.Text,
-}
+from validatable.generic_types import GUID
 
 
 def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
@@ -66,10 +43,65 @@ def from_str_to_sqlalchemy_type(python_type: type, m: ModelField):
         ]
         if length:
             return sa.String(max(length))
+
+    if issubclass(python_type, EmailStr):
+        return sa.String(320)
+
     return sa.Text
 
 
-def get_column(m: ModelField) -> sa.Column:  # noqa: C901
+def from_number_to_sqlalchemy_type(python_type: type, m: ModelField):
+
+    if issubclass(python_type, int):
+        return sa.Integer
+
+    if issubclass(python_type, float):
+        return sa.Float
+
+    if issubclass(python_type, decimal.Decimal):
+        return sa.Numeric
+
+    raise TypeError(
+        "cannot infer sqlalchemy type for {}".format(repr(python_type))
+    )
+
+
+def from_ipaddress_to_sqlalchemy_type(python_type: type, m: ModelField):
+
+    if issubclass(python_type, ipaddress._BaseV4):
+        return sa.String(31)
+
+    if issubclass(
+        python_type,
+        (ipaddress._BaseV6, IPvAnyAddress, IPvAnyNetwork, IPvAnyInterface),
+    ):
+        return sa.String(43)
+
+    raise TypeError(
+        "cannot infer sqlalchemy type for {}".format(repr(python_type))
+    )
+
+
+def from_datetimes_to_sqlalchemy_type(python_type: type, m: ModelField):
+
+    if issubclass(python_type, dt.datetime):
+        return sa.DateTime
+
+    if issubclass(python_type, dt.date):
+        return sa.Date
+
+    if issubclass(python_type, dt.time):
+        return sa.Time
+
+    if issubclass(python_type, dt.timedelta):
+        return sa.Interval
+
+    raise TypeError(
+        "cannot infer sqlalchemy type for {}".format(repr(python_type))
+    )
+
+
+def get_column(m: ModelField) -> sa.Column:
     column_name = m.alias
     col_kwargs = {
         k[3:]: v for k, v in m.field_info.extra.items() if k.startswith("sa_")
@@ -84,28 +116,31 @@ def get_column(m: ModelField) -> sa.Column:  # noqa: C901
 
     python_type = m.type_
 
-    if issubclass(python_type, str):
+    if issubclass(python_type, numbers.Number):
+        sa_type = from_number_to_sqlalchemy_type(python_type, m)
+        return sa.Column(column_name, sa_type, **col_kwargs)
+
+    if issubclass(python_type, (str, NameEmail, pathlib.Path)):
         sa_type = from_str_to_sqlalchemy_type(python_type, m)
         return sa.Column(column_name, sa_type, **col_kwargs)
 
-    if issubclass(python_type, enum.Enum):
-        return sa.Column(column_name, sa.Enum(python_type), **col_kwargs)
+    if issubclass(python_type, (str, uuid.UUID)):
+        return sa.Column(column_name, GUID, **col_kwargs)
 
-    if issubclass(python_type, int):
-        return sa.Column(column_name, sa.BigInteger, **col_kwargs)
-
-    if issubclass(python_type, float):
-        return sa.Column(column_name, sa.Float, **col_kwargs)
-
-    if issubclass(python_type, decimal.Decimal):
-        return sa.Column(column_name, sa.Numeric, **col_kwargs)
+    if issubclass(python_type, (dt.date, dt.time, dt.timedelta)):
+        sa_type = from_datetimes_to_sqlalchemy_type(python_type, m)
+        return sa.Column(column_name, sa_type, **col_kwargs)
 
     if issubclass(python_type, bytes):
         return sa.Column(column_name, sa.LargeBinary, **col_kwargs)
 
-    col_type = type_map.get(python_type, None)
-    if col_type:
-        return sa.Column(column_name, col_type, **col_kwargs)
+    if issubclass(python_type, enum.Enum):
+        return sa.Column(column_name, sa.Enum(python_type), **col_kwargs)
+
+    if issubclass(python_type, ipaddress._IPAddressBase):
+        sa_type = from_ipaddress_to_sqlalchemy_type(python_type, m)
+        return sa.Column(column_name, sa_type, **col_kwargs)
+
     raise TypeError(
         "cannot infer sqlalchemy type for {}".format(repr(python_type))
     )
