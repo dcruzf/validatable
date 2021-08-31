@@ -30,8 +30,8 @@ class ModelCase(BaseModel):
     con_bytes: conbytes(max_length=10)
     python_path: pathlib.Path
     sa_type: Decimal = Field(sa_type=sa.DECIMAL(precision=10))
-    sa_col: str = Field(
-        sa_col=sa.Column(sa.String(255), nullable=False), max_length=255
+    sa_column: str = Field(
+        sa_column=sa.Column(sa.String(255), nullable=False), max_length=255
     )
 
 
@@ -151,8 +151,8 @@ def test_get_column_sa_col():
     WHEN called with sa_col
     THEN the SqlAlchemy Column is returned
     """
-    sa_col = ModelCase.__fields__.get("sa_col")
-    col = get_column(sa_col)
+    sa_column = ModelCase.__fields__.get("sa_column")
+    col = get_column(sa_column)
     assert col.type.__class__ == sa.String
     assert col.type.length == 255
     assert not col.nullable
