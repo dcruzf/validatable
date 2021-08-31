@@ -1,0 +1,7 @@
+pytest
+coverage
+flake8-bugbear
+black
+isort
+pytest-cov
+coverage[toml]
