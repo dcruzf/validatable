@@ -106,7 +106,7 @@ def get_column(m: ModelField) -> sa.Column:
     col_kwargs = {
         k[3:]: v for k, v in m.field_info.extra.items() if k.startswith("sa_")
     }
-    column: sa.Column = col_kwargs.pop("column", None)
+    column = col_kwargs.pop("column", None)
     if isinstance(column, sa.Column):
         return prepare_column_name(column, column_name)
 
@@ -124,7 +124,7 @@ def get_column(m: ModelField) -> sa.Column:
         sa_type = from_str_to_sqlalchemy_type(python_type, m)
         return sa.Column(column_name, sa_type, **col_kwargs)
 
-    if issubclass(python_type, (str, uuid.UUID)):
+    if issubclass(python_type, uuid.UUID):
         return sa.Column(column_name, GUID, **col_kwargs)
 
     if issubclass(python_type, (dt.date, dt.time, dt.timedelta)):

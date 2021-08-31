@@ -90,8 +90,8 @@ def test_get_column_python_int():
     WHEN called with int
     THEN the SqlAlchemy type is BigInteger
     """
-    python_int = ModelCase.__fields__.get("python_int")
-    col = get_column(python_int)
+    field = ModelCase.__fields__.get("python_int")
+    col = get_column(field)
     assert col.type.__class__ == sa.Integer
 
 
