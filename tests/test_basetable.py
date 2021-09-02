@@ -203,6 +203,30 @@ class ModelCaseEnum(BaseTable, metadata=metadata):
     )
 
 
+def test_table_declaration():
+
+    table = sa.Table(
+        "modelcase",
+        metadata,
+        sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+    )
+
+    class ModelCase(BaseTable):
+
+        __sa_table__ = table
+        id: int = None
+
+    assert table == ModelCase.__sa_table__
+
+
+def test_raise_for_wrong_metadata():
+
+    with pytest.raises(TypeError):
+
+        class ModelCase(BaseTable, metadata="NotMetaData"):
+            id: int = None
+
+
 @pytest.mark.parametrize("model", [ModelCaseUUID() for n in range(NUM_TEST)])
 def test_database_uuid(model: ModelCaseUUID, conn):
     query = model.__sa_table__.insert().values(model.dict())

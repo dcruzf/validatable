@@ -8,9 +8,6 @@ from validatable.util import get_column
 
 
 class ValidatableMetaclass(ModelMetaclass):
-    def table(cls) -> sa.Table:
-        return cls.__sa_table__
-
     @classmethod
     def __prepare__(mcls, name, bases, *, metadata=None, **kwargs):
 
