@@ -9,6 +9,7 @@ class GUID(sa.types.TypeDecorator):
     BINARY(16), to store UUID.
     """
 
+    cache_ok = True
     impl = sa.types.BINARY
 
     def load_dialect_impl(self, dialect):
@@ -40,3 +41,31 @@ class GUID(sa.types.TypeDecorator):
     @property
     def python_type(self):
         return uuid.UUID
+
+
+class Stringfy(sa.types.TypeDecorator):
+    """Platform-independent GUID type.
+    Uses PostgreSQL's UUID type, otherwise uses
+    BINARY(16), to store UUID.
+    """
+
+    cache_ok = True
+    impl = sa.types.String
+
+    def load_dialect_impl(self, dialect):
+        return dialect.type_descriptor(sa.types.String)
+
+    def process_bind_param(self, value: uuid.UUID, dialect):
+        if value is None:
+            return value
+        if isinstance(value, str):
+            return value
+        else:
+            return str(value)
+
+    def process_result_value(self, value, dialect):
+        return value
+
+    @property
+    def python_type(self):
+        return str

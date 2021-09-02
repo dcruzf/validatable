@@ -33,7 +33,7 @@ from pydantic import (
     constr,
 )
 
-from validatable.generic_types import GUID
+from validatable.generic_types import GUID, Stringfy
 from validatable.util import get_column
 
 
@@ -152,7 +152,7 @@ def test_get_column_python_str():
     """
     python_str = ModelCase.__fields__.get("python_str")
     col = get_column(python_str)
-    assert col.type.__class__ == sa.Text
+    assert col.type.__class__ == Stringfy
 
 
 def test_get_column_con_str():
@@ -184,7 +184,7 @@ def test_get_column_name_email():
     """
     name_email = ModelCase.__fields__.get("name_email")
     col = get_column(name_email)
-    assert col.type.__class__ == sa.Text
+    assert col.type.__class__ == Stringfy
 
 
 def test_get_column_python_bytes():
@@ -214,7 +214,7 @@ def test_get_column_python_path():
     """
     python_path = ModelCase.__fields__.get("python_path")
     col = get_column(python_path)
-    assert col.type.__class__ == sa.Text
+    assert col.type.__class__ == Stringfy
 
 
 def test_get_column_sa_col():
@@ -263,8 +263,7 @@ def test_get_column_network_types(field: str, length: int):
     """
     network_type = ModelCase.__fields__.get(field)
     col = get_column(network_type)
-    assert col.type.__class__ == sa.String
-    assert col.type.length == length
+    assert col.type.__class__ == Stringfy
 
 
 @pytest.mark.parametrize(

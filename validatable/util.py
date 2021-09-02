@@ -12,7 +12,7 @@ from pydantic.fields import ModelField
 from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
 from pydantic.types import ConstrainedStr
 
-from validatable.generic_types import GUID
+from validatable.generic_types import GUID, Stringfy
 
 
 def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
@@ -47,7 +47,7 @@ def from_str_to_sqlalchemy_type(python_type: type, m: ModelField):
     if issubclass(python_type, EmailStr):
         return sa.String(320)
 
-    return sa.Text
+    return Stringfy
 
 
 def from_number_to_sqlalchemy_type(python_type: type, m: ModelField):
@@ -69,13 +69,13 @@ def from_number_to_sqlalchemy_type(python_type: type, m: ModelField):
 def from_ipaddress_to_sqlalchemy_type(python_type: type, m: ModelField):
 
     if issubclass(python_type, ipaddress._BaseV4):
-        return sa.String(31)
+        return Stringfy
 
     if issubclass(
         python_type,
         (ipaddress._BaseV6, IPvAnyAddress, IPvAnyNetwork, IPvAnyInterface),
     ):
-        return sa.String(43)
+        return Stringfy
 
     raise TypeError(
         "cannot infer sqlalchemy type for {}".format(repr(python_type))

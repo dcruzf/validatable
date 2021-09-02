@@ -5,3 +5,4 @@ black
 isort
 pytest-cov
 coverage[toml]
+faker
