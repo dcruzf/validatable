@@ -34,7 +34,7 @@ from pydantic import (
 )
 
 from validatable.generic_types import GUID, Stringfy
-from validatable.util import get_column
+from validatable.inference import get_column
 
 
 class CaseEnum(enum.Enum):

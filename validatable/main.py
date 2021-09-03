@@ -4,7 +4,7 @@ from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 from sqlalchemy.sql.schema import MetaData
 
-from validatable.util import get_column
+from validatable.inference import get_column
 
 
 class ValidatableMetaclass(ModelMetaclass):
@@ -43,6 +43,49 @@ class ValidatableMetaclass(ModelMetaclass):
         )
         return cls
 
+    @property
+    def c(cls):
+        return cls.__sa_table__.c
+
 
 class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
-    ...
+    @property
+    def c(self):
+        """
+        columns
+        """
+        return self.__sa_table__.c
+
+    @classmethod
+    def insert(self, values=None, inline=False, **kwargs):
+        """
+        table.insert()
+
+        """
+        return self.__sa_table__.insert(values=values, inline=inline, **kwargs)
+
+    @classmethod
+    def update(self, whereclause=None, values=None, inline=False, **kwargs):
+        """
+        table.update()
+
+        """
+        return self.__sa_table__.update(
+            whereclause=whereclause, values=values, inline=inline, **kwargs
+        )
+
+    @classmethod
+    def delete(self, whereclause=None, **kwargs):
+        """
+        table.delete()
+
+        """
+        return self.__sa_table__.delete(whereclause=whereclause, **kwargs)
+
+    @classmethod
+    def select(self, whereclause=None, **kwargs):
+        """
+        table.select()
+
+        """
+        return self.__sa_table__.select(whereclause=whereclause, **kwargs)

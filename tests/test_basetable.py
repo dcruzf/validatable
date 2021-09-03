@@ -229,12 +229,10 @@ def test_raise_for_wrong_metadata():
 
 @pytest.mark.parametrize("model", [ModelCaseUUID() for n in range(NUM_TEST)])
 def test_database_uuid(model: ModelCaseUUID, conn):
-    query = model.__sa_table__.insert().values(model.dict())
-    one = model.__sa_table__.select().where(
-        model.__sa_table__.c.id == model.id
-    )
+    insert = ModelCaseUUID.insert().values(model.dict())
+    one = ModelCaseUUID.select().where(ModelCaseUUID.c.id == model.id)
 
-    conn.execute(query)
+    conn.execute(insert)
     result = conn.execute(one)
     data = result.fetchone()
 
@@ -245,12 +243,10 @@ def test_database_uuid(model: ModelCaseUUID, conn):
 @pytest.mark.parametrize("model", [ModelCaseNumber() for n in range(NUM_TEST)])
 def test_database_number(model: ModelCaseNumber, conn):
 
-    query = model.__sa_table__.insert().values(model.dict())
-    one = model.__sa_table__.select().where(
-        model.__sa_table__.c.id == model.id
-    )
+    insert = ModelCaseNumber.insert().values(model.dict())
+    one = ModelCaseNumber.select().where(ModelCaseNumber.c.id == model.id)
 
-    conn.execute(query)
+    conn.execute(insert)
     result = conn.execute(one)
     data = result.fetchone()
 
@@ -272,12 +268,10 @@ def test_database_number(model: ModelCaseNumber, conn):
 )
 def test_database_strbytes(model: ModelCaseStrBytes, conn):
 
-    query = model.__sa_table__.insert().values(model.dict())
-    one = model.__sa_table__.select().where(
-        model.__sa_table__.c.id == model.id
-    )
+    insert = ModelCaseStrBytes.insert().values(model.dict())
+    one = ModelCaseStrBytes.select().where(ModelCaseStrBytes.c.id == model.id)
 
-    conn.execute(query)
+    conn.execute(insert)
     result = conn.execute(one)
     data = result.fetchone()
 
@@ -291,12 +285,10 @@ def test_database_strbytes(model: ModelCaseStrBytes, conn):
 )
 def test_database_network(model: ModelCaseNetwork, conn):
 
-    query = model.__sa_table__.insert().values(model.dict())
-    one = model.__sa_table__.select().where(
-        model.__sa_table__.c.id == model.id
-    )
+    insert = ModelCaseNetwork.insert().values(model.dict())
+    one = ModelCaseNetwork.select().where(ModelCaseNetwork.c.id == model.id)
 
-    conn.execute(query)
+    conn.execute(insert)
     result = conn.execute(one)
     data = result.fetchone()
 
@@ -310,12 +302,10 @@ def test_database_network(model: ModelCaseNetwork, conn):
 )
 def test_database_datetime(model: ModelCaseDateTime, conn):
 
-    query = model.__sa_table__.insert().values(model.dict())
-    one = model.__sa_table__.select().where(
-        model.__sa_table__.c.id == model.id
-    )
+    insert = ModelCaseDateTime.insert().values(model.dict())
+    one = ModelCaseDateTime.select().where(ModelCaseDateTime.c.id == model.id)
 
-    conn.execute(query)
+    conn.execute(insert)
     result = conn.execute(one)
     data = result.fetchone()
 
@@ -327,15 +317,60 @@ def test_database_datetime(model: ModelCaseDateTime, conn):
 @pytest.mark.parametrize("model", [ModelCaseEnum() for n in range(NUM_TEST)])
 def test_database_enum(model: ModelCaseEnum, conn):
 
-    query = model.__sa_table__.insert().values(model.dict())
-    one = model.__sa_table__.select().where(
-        model.__sa_table__.c.id == model.id
-    )
+    insert = ModelCaseEnum.insert().values(model.dict())
+    one = ModelCaseEnum.select().where(ModelCaseEnum.c.id == model.id)
 
-    conn.execute(query)
+    conn.execute(insert)
     result = conn.execute(one)
     data = result.fetchone()
 
     m = ModelCaseEnum.parse_obj(data)
 
     assert m == model
+
+
+class ModelUpdateDelete(BaseTable, metadata=metadata):
+    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+    num: int = 0
+
+
+def test_database_update(conn):
+    model = ModelUpdateDelete()
+    insert = ModelUpdateDelete.insert().values(model.dict())
+
+    update = (
+        ModelUpdateDelete.update()
+        .where(ModelUpdateDelete.c.id == model.id)
+        .values(num=5)
+    )
+    one = ModelUpdateDelete.select().where(ModelUpdateDelete.c.id == model.id)
+
+    conn.execute(insert)
+
+    conn.execute(update)
+    result_updated = conn.execute(one)
+    data_updated = result_updated.fetchone()
+    model_updated = ModelUpdateDelete.parse_obj(data_updated)
+
+    assert model_updated.id == model.id
+    assert model_updated.num != model.num
+    assert model_updated.num == 5
+
+
+def test_database_delete(conn):
+    model = ModelUpdateDelete()
+    insert = ModelUpdateDelete.insert().values(model.dict())
+    c = model.c
+
+    delete = ModelUpdateDelete.delete().where(c.id == model.id)
+    query = ModelUpdateDelete.select()
+
+    conn.execute(insert)
+    results = conn.execute(query)
+    data_before_delete = results.all()
+    conn.execute(delete)
+    results = conn.execute(query)
+    data_after_delete = results.all()
+
+    assert len(data_before_delete) == 1
+    assert len(data_after_delete) == 0

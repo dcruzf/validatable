@@ -1,7 +1,7 @@
 import pytest
 import sqlalchemy as sa
 
-from validatable.util import prepare_column_name
+from validatable.inference import prepare_column_name
 
 
 @pytest.mark.parametrize(
