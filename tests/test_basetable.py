@@ -189,6 +189,12 @@ class ModelCaseDateTime(BaseTable, metadata=metadata):
 
 
 class CaseEnum(enum.Enum):
+    a: int = "a"
+    b: int = "b"
+    c: int = "c"
+
+
+class CaseIntEnum(enum.IntEnum):
     a: int = 1
     b: int = 2
     c: int = 3
@@ -201,6 +207,16 @@ class ModelCaseEnum(BaseTable, metadata=metadata):
             CaseEnum, random.choice(list(CaseEnum.__members__.keys()))
         )
     )
+    int_enum_field: CaseEnum = Field(
+        default_factory=lambda: getattr(
+            CaseEnum, random.choice(list(CaseIntEnum.__members__.keys()))
+        )
+    )
+
+
+class ModelUpdateDelete(BaseTable, metadata=metadata):
+    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+    num: int = 0
 
 
 def test_table_declaration():
@@ -327,11 +343,6 @@ def test_database_enum(model: ModelCaseEnum, conn):
     m = ModelCaseEnum.parse_obj(data)
 
     assert m == model
-
-
-class ModelUpdateDelete(BaseTable, metadata=metadata):
-    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
-    num: int = 0
 
 
 def test_database_update(conn):

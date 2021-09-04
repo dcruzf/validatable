@@ -58,7 +58,10 @@ class ModelCase(BaseModel):
     python_decimal: Decimal = 1.23
     con_decimal: condecimal(max_digits=10)
     python_str: str
+    python_str_max: str = Field(max_length=10)
     con_str: constr(max_length=10)
+    con_str_curtain: constr(curtail_length=9)
+    con_str_curtain_max: constr(curtail_length=9, max_length=20)
     email_str: EmailStr
     name_email: NameEmail
     python_bytes: bytes
@@ -78,11 +81,19 @@ class ModelCase(BaseModel):
     dt_time: dt.time
     dt_timedelta: dt.timedelta
     enum_field: CaseEnum
+    name: int = Field(sa_column=sa.Column("not_valid", sa.Integer))
 
     sa_type: Decimal = Field(sa_type=sa.DECIMAL(precision=10))
     sa_column: str = Field(
         sa_column=sa.Column(sa.String(255), nullable=False), max_length=255
     )
+
+
+def test_column_declaration_with_invalid_name():
+
+    with pytest.raises(ValueError):
+        field = ModelCase.__fields__.get("name")
+        get_column(field)
 
 
 def test_get_column_python_int():
@@ -155,6 +166,17 @@ def test_get_column_python_str():
     assert col.type.__class__ == Stringfy
 
 
+def test_get_column_python_str_field_max_length():
+    """
+    WHEN called with str
+    THEN the SqlAlchemy type is Text
+    """
+    python_str = ModelCase.__fields__.get("python_str_max")
+    col = get_column(python_str)
+    assert col.type.__class__ == sa.String
+    assert col.type.length == 10
+
+
 def test_get_column_con_str():
     """
     WHEN called with ConstrainedStringValue with max_length=10
@@ -164,6 +186,28 @@ def test_get_column_con_str():
     col = get_column(con_str)
     assert col.type.__class__ == sa.String
     assert col.type.length == 10
+
+
+def test_get_column_con_str_curtain():
+    """
+    WHEN called with ConstrainedStringValue with max_length=10
+    THEN the SqlAlchemy type is String(10)
+    """
+    con_str = ModelCase.__fields__.get("con_str_curtain")
+    col = get_column(con_str)
+    assert col.type.__class__ == sa.String
+    assert col.type.length == 9
+
+
+def test_get_column_con_str_curtain_and_max_length():
+    """
+    WHEN called with ConstrainedStringValue with max_length=10
+    THEN the SqlAlchemy type is String(10)
+    """
+    con_str = ModelCase.__fields__.get("con_str_curtain_max")
+    col = get_column(con_str)
+    assert col.type.__class__ == sa.String
+    assert col.type.length == 20
 
 
 def test_get_column_email_str():

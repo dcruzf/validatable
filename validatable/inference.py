@@ -23,26 +23,17 @@ def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
         column.name = column_name
         return column
 
-    if column.name != column_name:
-        raise ValueError(
-            "Column name must be equal to field name, or field alias, or None"
-        )
+    raise ValueError(
+        "Column name must be equal to field name, or field alias, or None"
+    )
 
 
 def from_str_to_sqlalchemy_type(python_type: type, m: ModelField):
     if m.field_info.max_length:
         return sa.String(m.field_info.max_length)
     if issubclass(python_type, ConstrainedStr):
-        length = [
-            length
-            for length in [
-                python_type.max_length,
-                python_type.curtail_length,
-            ]
-            if length
-        ]
-        if length:
-            return sa.String(max(length))
+        length = python_type.max_length or python_type.curtail_length
+        return sa.String(length)
 
     if issubclass(python_type, EmailStr):
         return sa.String(320)
