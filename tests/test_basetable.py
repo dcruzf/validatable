@@ -273,8 +273,8 @@ def test_database_number(model: ModelCaseNumber, conn):
         assert m.dict(exclude={"python_decimal", "con_decimal"}) == model.dict(
             exclude={"python_decimal", "con_decimal"}
         )
-        assert (float(m.con_decimal) - float(model.con_decimal)) < 0.001
-        assert (float(m.python_decimal) - float(model.python_decimal)) < 0.001
+        assert (float(m.con_decimal) - float(model.con_decimal)) == 0
+        assert (float(m.python_decimal) - float(model.python_decimal)) == 0
     else:
         assert m == model
 
