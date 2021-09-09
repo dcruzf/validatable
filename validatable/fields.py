@@ -1,10 +1,8 @@
 from typing import Any, List, Optional
 
-import sqlalchemy as sa
 from pydantic.fields import FieldInfo, Undefined
 from pydantic.typing import NoArgAnyCallable
-
-sa.Column
+from sqlalchemy import ForeignKey
 
 
 def Field(
@@ -26,19 +24,21 @@ def Field(
     max_length: int = None,
     allow_mutation: bool = True,
     regex: str = None,
-    primary_key: Optional[bool] = False,
-    foreign_key: Optional[sa.ForeignKey] = None,
-    nullable: Optional[bool] = None,
-    index: Optional[bool] = None,
-    unique: Optional[bool] = None,
+    sa_primary_key: Optional[bool] = False,
+    sa_foreign_key: Optional[ForeignKey] = None,
+    sa_nullable: Optional[bool] = None,
+    sa_index: Optional[bool] = None,
+    sa_unique: Optional[bool] = None,
     sa_args: List[Any] = None,
     **extra: Any,
 ) -> Any:
-    extra["sa_primary_key"] = primary_key
-    extra["sa_foreign_key"] = foreign_key
-    extra["sa_nullable"] = nullable
-    extra["sa_index"] = index
-    extra["sa_unique"] = unique
+    extra["sa_primary_key"] = sa_primary_key
+    extra["sa_nullable"] = sa_nullable
+    extra["sa_index"] = sa_index
+    extra["sa_unique"] = sa_unique
+    extra["sa_args"] = sa_args or []
+    if sa_foreign_key is not None:
+        extra["sa_args"].append(sa_foreign_key)
 
     field_info = FieldInfo(
         default,
