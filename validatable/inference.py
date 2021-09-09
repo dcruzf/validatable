@@ -92,20 +92,24 @@ def from_datetimes_to_sqlalchemy_type(python_type: type, m: ModelField):
     )
 
 
-def get_column(m: ModelField) -> sa.Column:
+def get_sa_args_kwargs(m: ModelField) -> dict:
     keys = tuple(m.field_info.extra.keys())
     col_kwargs = {
         k[3:]: m.field_info.extra.pop(k) for k in keys if k.startswith("sa_")
     }
+    return col_kwargs
+
+
+def get_column(m: ModelField) -> sa.Column:
+    col_kwargs = get_sa_args_kwargs(m)
     column = col_kwargs.pop("column", None)
-    args = col_kwargs.pop("args", [])
-    fk = m.field_info.extra.pop("foreign_key", None)
-    if fk:
-        args.append(fk)
+
     if isinstance(column, sa.Column):
         return prepare_column_name(column, m.alias)
 
+    args = col_kwargs.pop("args", [])
     column_type = col_kwargs.pop("type", None) or col_kwargs.pop("type_", None)
+
     if column_type:
         return sa.Column(m.alias, column_type, *args, **col_kwargs)
 
