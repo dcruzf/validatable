@@ -13,8 +13,18 @@ class ValidatableMetaclass(ModelMetaclass):
 
         if isinstance(metadata, MetaData):
             return {"__sa_metadata__": metadata}
+
         elif metadata is None:
-            return {}
+
+            for base in bases:
+                if not hasattr(base, "__sa_metadata__"):
+                    continue
+                if metadata is None:
+                    metadata = base.__sa_metadata__
+                    return {"__sa_metadata__": metadata}
+            else:
+                return {}
+
         else:
             raise TypeError("metadata must be a sqlalquemy metadata")
 
@@ -24,8 +34,9 @@ class ValidatableMetaclass(ModelMetaclass):
         if isinstance(table, sa.Table):
             return super().__new__(mcls, name, bases, namespace, **kwargs)
 
-        metadata = namespace.get("__sa_metadata__")
+        metadata = namespace.get("__sa_metadata__", None)
         if metadata is None:
+            namespace["__sa_metadata__"] = namespace.pop("metadata", None)
             return super().__new__(mcls, name, bases, namespace, **kwargs)
 
         tablename = namespace.get("__sa_tablename__", name.lower())
@@ -46,6 +57,10 @@ class ValidatableMetaclass(ModelMetaclass):
     @property
     def c(cls):
         return cls.__sa_table__.c
+
+    @property
+    def metadata(cls) -> MetaData:
+        return cls.__sa_metadata__
 
 
 class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
