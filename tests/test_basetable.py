@@ -1,5 +1,6 @@
 import datetime as dt
 import enum
+import os
 import pathlib
 import random
 import uuid
@@ -47,22 +48,40 @@ Faker.seed(2)
 faker = Faker()
 
 
-NUM_TEST: int = 10
-engine = sa.create_engine("sqlite:///:memory:")
-
+NUM_TEST = int(os.getenv("N") or 1)
+DATABASE = os.getenv("DB") or "sqlite"
 metadata = sa.MetaData()
 
 
-@pytest.fixture
-def conn():
+@pytest.fixture(scope="session")
+def engine():
+
+    if DATABASE == "sqlite":
+        yield sa.create_engine("sqlite:///:memory:")
+    if DATABASE == "postgresql":
+        yield sa.create_engine(
+            "postgresql://validatable:password@localhost:5432/db"
+        )
+    if DATABASE == "mariadb":
+        yield sa.create_engine(
+            "mariadb://validatable:password@localhost:3306/db"
+        )
+
+
+@pytest.fixture(scope="function")
+def conn(engine):
+    metadata.create_all(engine)
     with engine.connect() as conn:
-        metadata.create_all(engine)
         yield conn
-        metadata.drop_all(engine)
+    metadata.drop_all(engine)
 
 
-class ModelCaseUUID(BaseTable, metadata=metadata):
+class Base(BaseTable):
     id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+    metadata = metadata
+
+
+class ModelCaseUUID(Base):
     uuid1: UUID1 = Field(default_factory=uuid.uuid1)
     uuid3: UUID3 = Field(
         default_factory=lambda: uuid.uuid3(uuid.uuid4(), "name")
@@ -73,8 +92,7 @@ class ModelCaseUUID(BaseTable, metadata=metadata):
     )
 
 
-class ModelCaseNumber(BaseTable, metadata=metadata):
-    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+class ModelCaseNumber(Base):
     python_int: int = Field(
         default_factory=lambda: random.randint(-2147483648, 2147483647)
     )
@@ -92,10 +110,14 @@ class ModelCaseNumber(BaseTable, metadata=metadata):
         )
     )
     python_decimal: Decimal = Field(
-        default_factory=lambda: f"{random.uniform(-1000000000, 1000000000):.10f}"  # noqa E501
+        default_factory=lambda: Decimal(
+            f"{random.uniform(-1000000000, 1000000000):.10f}"
+        )  # noqa E501
     )
     con_decimal: condecimal() = Field(
-        default_factory=lambda: f"{random.uniform(-1000000000, 1000000000):.10f}"  # noqa E501
+        default_factory=lambda: Decimal(
+            f"{random.uniform(-1000000000, 1000000000):.10f}"
+        )  # noqa E501
     )
     pint: PositiveInt = Field(
         default_factory=lambda: random.randint(0, 2147483647)
@@ -111,8 +133,7 @@ class ModelCaseNumber(BaseTable, metadata=metadata):
     )
 
 
-class ModelCaseStrBytes(BaseTable, metadata=metadata):
-    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+class ModelCaseStrBytes(Base):
     python_str: str = Field(
         default_factory=faker.sentence, sa_primary_key=True
     )
@@ -139,8 +160,7 @@ class ModelCaseStrBytes(BaseTable, metadata=metadata):
     )
 
 
-class ModelCaseNetwork(BaseTable, metadata=metadata):
-    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+class ModelCaseNetwork(Base):
     ipv4: IPv4Address = Field(default_factory=lambda: ip_address(faker.ipv4()))
     ipv4i: IPv4Interface = Field(
         default_factory=lambda: ip_interface(faker.ipv4(network=True))
@@ -176,8 +196,7 @@ class ModelCaseNetwork(BaseTable, metadata=metadata):
     )
 
 
-class ModelCaseDateTime(BaseTable, metadata=metadata):
-    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+class ModelCaseDateTime(Base):
     dt_datetime: dt.datetime = Field(default_factory=faker.date_time_between)
     dt_date: dt.date = Field(default_factory=faker.date_between)
     dt_time: dt.time = Field(default_factory=faker.time_object)
@@ -200,8 +219,7 @@ class CaseIntEnum(enum.IntEnum):
     c: int = 3
 
 
-class ModelCaseEnum(BaseTable, metadata=metadata):
-    id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
+class ModelCaseEnum(Base):
     enum_field: CaseEnum = Field(
         default_factory=lambda: getattr(
             CaseEnum, random.choice(list(CaseEnum.__members__.keys()))
@@ -217,6 +235,29 @@ class ModelCaseEnum(BaseTable, metadata=metadata):
 class ModelUpdateDelete(BaseTable, metadata=metadata):
     id: UUID4 = Field(default_factory=uuid.uuid4, sa_primary_key=True)
     num: int = 0
+
+
+def test_metadata_property():
+
+    meta = sa.MetaData()
+
+    class ModelCase(BaseTable, metadata=meta):
+        id: int = Field(sa_primary_key=True)
+
+    class Base(BaseTable):
+        metadata = meta
+        id: int = Field(sa_primary_key=True)
+
+    class TableFromBase(Base):
+        ...
+
+    class Table(BaseTable):
+        __sa_metadata__ = meta
+        id: int = Field(sa_primary_key=True)
+
+    assert TableFromBase.metadata == meta
+    assert ModelCase.metadata == meta
+    assert Table.metadata == meta
 
 
 def test_table_declaration():
@@ -256,6 +297,10 @@ def test_database_uuid(model: ModelCaseUUID, conn):
     assert m == model
 
 
+@pytest.mark.filterwarnings(
+    r"ignore:Dialect sqlite\+pysqlite does \*not\* "
+    r"support Decimal objects natively"
+)
 @pytest.mark.parametrize("model", [ModelCaseNumber() for n in range(NUM_TEST)])
 def test_database_number(model: ModelCaseNumber, conn):
 
@@ -268,15 +313,7 @@ def test_database_number(model: ModelCaseNumber, conn):
 
     m = ModelCaseNumber.parse_obj(data)
 
-    # Dialect sqlite+pysqlite does *not* support Decimal objects natively
-    if engine.name == "sqlite":
-        assert m.dict(exclude={"python_decimal", "con_decimal"}) == model.dict(
-            exclude={"python_decimal", "con_decimal"}
-        )
-        assert (float(m.con_decimal) - float(model.con_decimal)) == 0
-        assert (float(m.python_decimal) - float(model.python_decimal)) == 0
-    else:
-        assert m == model
+    assert m == model
 
 
 @pytest.mark.parametrize(
@@ -378,10 +415,10 @@ def test_database_delete(conn):
 
     conn.execute(insert)
     results = conn.execute(query)
-    data_before_delete = results.all()
+    data_before_delete = results.fetchall()
     conn.execute(delete)
     results = conn.execute(query)
-    data_after_delete = results.all()
+    data_after_delete = results.fetchall()
 
     assert len(data_before_delete) == 1
     assert len(data_after_delete) == 0
