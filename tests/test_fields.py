@@ -1,9 +1,9 @@
 import pytest
+import sqlalchemy as sa
+from sqlalchemy import ForeignKey
 
 from validatable.fields import Field
 from validatable.main import BaseTable
-from sqlalchemy import ForeignKey
-import sqlalchemy as sa
 
 
 @pytest.mark.parametrize(
