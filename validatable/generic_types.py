@@ -44,9 +44,8 @@ class GUID(sa.types.TypeDecorator):
 
 
 class Stringfy(sa.types.TypeDecorator):
-    """Platform-independent GUID type.
-    Uses PostgreSQL's UUID type, otherwise uses
-    BINARY(16), to store UUID.
+    """Platform-independent String type.
+    Uses str(value) to bind parametre type.
     """
 
     cache_ok = True
