@@ -6,3 +6,5 @@ isort
 pytest-cov
 coverage[toml]
 faker
+psycopg2-binary
+autoflake

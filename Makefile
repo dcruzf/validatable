@@ -19,7 +19,12 @@ black:
 isort:
 	@isort .
 
-format: isort black
+autoflake:
+	@isort . --force-single-line-imports > /dev/null
+	@autoflake -r -i --remove-all-unused-imports --remove-unused-variables ./validatable/
+	@isort . > /dev/null
+
+format: black autoflake
 
 flake8:
 	@flake8 validatable/
