@@ -84,12 +84,7 @@ def from_datetimes_to_sqlalchemy_type(python_type: type, m: ModelField):
     if issubclass(python_type, dt.time):
         return sa.Time
 
-    if issubclass(python_type, dt.timedelta):
-        return sa.Interval
-
-    raise TypeError(
-        "cannot infer sqlalchemy type for {}".format(repr(python_type))
-    )
+    return sa.Interval
 
 
 def get_sa_args_kwargs(m: ModelField) -> dict:

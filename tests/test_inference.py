@@ -1,8 +1,10 @@
 import datetime as dt
+import numbers
 import enum
 import pathlib
 import uuid
 from decimal import Decimal
+import ipaddress
 from ipaddress import (
     IPv4Address,
     IPv4Interface,
@@ -352,3 +354,16 @@ def test_get_column_uuid(field: str):
     col = get_column(field)
     assert col.type.__class__ == GUID
     assert col.type.python_type == uuid.UUID
+
+
+@pytest.mark.parametrize("T", (numbers.Real, ipaddress._IPAddressBase, object))
+def test_invalid_type(T):
+    class ModelCase(BaseModel):
+        field: T
+
+        class Config:
+            arbitrary_types_allowed = True
+
+    field = ModelCase.__fields__.get("field")
+    with pytest.raises(TypeError):
+        get_column(field)
