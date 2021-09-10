@@ -1,10 +1,10 @@
 import datetime as dt
-import numbers
 import enum
+import ipaddress
+import numbers
 import pathlib
 import uuid
 from decimal import Decimal
-import ipaddress
 from ipaddress import (
     IPv4Address,
     IPv4Interface,
@@ -35,7 +35,7 @@ from pydantic import (
     constr,
 )
 
-from validatable.generic_types import GUID, Stringfy
+from validatable.generic_types import GUID, AutoString
 from validatable.inference import get_column
 
 
@@ -165,7 +165,7 @@ def test_get_column_python_str():
     """
     python_str = ModelCase.__fields__.get("python_str")
     col = get_column(python_str)
-    assert col.type.__class__ == Stringfy
+    assert col.type.__class__ == AutoString
 
 
 def test_get_column_python_str_field_max_length():
@@ -230,7 +230,7 @@ def test_get_column_name_email():
     """
     name_email = ModelCase.__fields__.get("name_email")
     col = get_column(name_email)
-    assert col.type.__class__ == Stringfy
+    assert col.type.__class__ == AutoString
 
 
 def test_get_column_python_bytes():
@@ -260,7 +260,7 @@ def test_get_column_python_path():
     """
     python_path = ModelCase.__fields__.get("python_path")
     col = get_column(python_path)
-    assert col.type.__class__ == Stringfy
+    assert col.type.__class__ == AutoString
 
 
 def test_get_column_sa_col():
@@ -309,7 +309,7 @@ def test_get_column_network_types(field: str, length: int):
     """
     network_type = ModelCase.__fields__.get(field)
     col = get_column(network_type)
-    assert col.type.__class__ == Stringfy
+    assert col.type.__class__ == AutoString
 
 
 @pytest.mark.parametrize(

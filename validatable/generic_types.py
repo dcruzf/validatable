@@ -43,15 +43,18 @@ class GUID(sa.types.TypeDecorator):
         return uuid.UUID
 
 
-class Stringfy(sa.types.TypeDecorator):
+class AutoString(sa.types.TypeDecorator):
     """Platform-independent String type.
     Uses str(value) to bind parametre type.
     """
 
     cache_ok = True
     impl = sa.types.String
+    length = 512
 
     def load_dialect_impl(self, dialect):
+        if dialect.name in ("mysql", "mariadb"):
+            return dialect.type_descriptor(sa.types.String(self.length))
         return dialect.type_descriptor(sa.types.String)
 
     def process_bind_param(self, value: uuid.UUID, dialect):
