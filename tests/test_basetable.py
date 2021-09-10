@@ -422,3 +422,54 @@ def test_database_delete(conn):
 
     assert len(data_before_delete) == 1
     assert len(data_after_delete) == 0
+
+
+class LeftTable(Base):
+    a: str = "a"
+
+
+class RightTable(Base):
+    b: str = "b"
+    left_id: UUID4 = Field(sa_args=[sa.ForeignKey(LeftTable.c.id)])
+
+
+def test_database_join_with_pydantic_model(conn):
+
+    left = LeftTable()
+    insert_left = LeftTable.insert().values(left.dict())
+    conn.execute(insert_left)
+
+    right = RightTable(left_id=left.id)
+    insert_right = RightTable.insert().values(right.dict())
+    conn.execute(insert_right)
+
+    join = RightTable.join(LeftTable, LeftTable.c.id == RightTable.c.left_id)
+    query = sa.select([*RightTable.c, *LeftTable.c]).select_from(join)
+
+    result_join = conn.execute(query)
+    data = result_join.fetchall()
+
+    assert data[0][0] == right.id
+    assert data[0][2] == left.id
+
+
+def test_database_join_with_table(conn):
+
+    left = LeftTable()
+    insert_left = LeftTable.insert().values(left.dict())
+    conn.execute(insert_left)
+
+    right = RightTable(left_id=left.id)
+    insert_right = RightTable.insert().values(right.dict())
+    conn.execute(insert_right)
+
+    join = RightTable.join(
+        LeftTable.__sa_table__, LeftTable.c.id == RightTable.c.left_id
+    )
+    query = sa.select([*RightTable.c, *LeftTable.c]).select_from(join)
+
+    result_join = conn.execute(query)
+    data = result_join.fetchall()
+
+    assert data[0][0] == right.id
+    assert data[0][2] == left.id

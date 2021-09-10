@@ -68,35 +68,51 @@ class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
         return self.__sa_table__.c
 
     @classmethod
-    def insert(self, values=None, inline=False, **kwargs):
+    def insert(cls, values=None, inline=False, **kwargs):
         """
         table.insert()
 
         """
-        return self.__sa_table__.insert(values=values, inline=inline, **kwargs)
+        return cls.__sa_table__.insert(values=values, inline=inline, **kwargs)
 
     @classmethod
-    def update(self, whereclause=None, values=None, inline=False, **kwargs):
+    def update(cls, whereclause=None, values=None, inline=False, **kwargs):
         """
         table.update()
 
         """
-        return self.__sa_table__.update(
+        return cls.__sa_table__.update(
             whereclause=whereclause, values=values, inline=inline, **kwargs
         )
 
     @classmethod
-    def delete(self, whereclause=None, **kwargs):
+    def delete(cls, whereclause=None, **kwargs):
         """
         table.delete()
 
         """
-        return self.__sa_table__.delete(whereclause=whereclause, **kwargs)
+        return cls.__sa_table__.delete(whereclause=whereclause, **kwargs)
 
     @classmethod
-    def select(self, whereclause=None, **kwargs):
+    def select(cls, whereclause=None, **kwargs):
         """
         table.select()
 
         """
-        return self.__sa_table__.select(whereclause=whereclause, **kwargs)
+        return cls.__sa_table__.select(whereclause=whereclause, **kwargs)
+
+    @classmethod
+    def join(cls, right, onclause=None, isouter=False, full=False):
+        """
+        table.join()
+
+        """
+        if hasattr(right, "__sa_table__"):
+            right = right.__sa_table__
+
+        return cls.__sa_table__.join(
+            right, onclause=onclause, isouter=isouter, full=full
+        )
+
+
+sa.Table
