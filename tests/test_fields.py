@@ -87,3 +87,30 @@ def test_model_foreign_key():
 
     assert len(Item.c.name.foreign_keys) == 1
     assert fk in Item.c.name.foreign_keys
+
+
+def test_model_foreign_key_with_fk():
+
+    metadata = sa.MetaData()
+
+    class Item(BaseTable, metadata=metadata):
+        id: int = Field(sa_primary_key=True)
+        name: str = Field("", sa_fk="test.id")
+
+    fk = tuple(Item.c.name.foreign_keys)[0]
+
+    assert len(Item.c.name.foreign_keys) == 1
+    assert fk.target_fullname == "test.id"
+
+
+def test_model_foreign_key_raises():
+
+    metadata = sa.MetaData()
+
+    with pytest.raises(RuntimeError):
+
+        class Item(BaseTable, metadata=metadata):
+            id: int = Field(sa_primary_key=True)
+            name: str = Field(
+                "", sa_fk="test.id", sa_foreign_key=ForeignKey("test.id")
+            )
