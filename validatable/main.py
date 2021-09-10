@@ -16,12 +16,8 @@ class ValidatableMetaclass(ModelMetaclass):
 
         elif metadata is None:
 
-            for base in bases:
-                if not hasattr(base, "__sa_metadata__"):
-                    continue
-                if metadata is None:
-                    metadata = base.__sa_metadata__
-                    return {"__sa_metadata__": metadata}
+            if bases and hasattr(bases[0], "__sa_metadata__"):
+                return {"__sa_metadata__": bases[0].__sa_metadata__}
             else:
                 return {}
 
