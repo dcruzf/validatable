@@ -87,6 +87,34 @@ def from_datetimes_to_sqlalchemy_type(python_type: type, m: ModelField):
     return sa.Interval
 
 
+def get_type(m: ModelField):
+
+    if issubclass(m.type_, numbers.Number):
+        return from_number_to_sqlalchemy_type(m.type_, m)
+
+    if issubclass(m.type_, (str, NameEmail, pathlib.Path)):
+        return from_str_to_sqlalchemy_type(m.type_, m)
+
+    if issubclass(m.type_, uuid.UUID):
+        return GUID
+
+    if issubclass(m.type_, (dt.date, dt.time, dt.timedelta)):
+        return from_datetimes_to_sqlalchemy_type(m.type_, m)
+
+    if issubclass(m.type_, bytes):
+        return sa.LargeBinary
+
+    if issubclass(m.type_, enum.Enum):
+        return sa.Enum(m.type_)
+
+    if issubclass(m.type_, ipaddress._IPAddressBase):
+        return from_ipaddress_to_sqlalchemy_type(m.type_, m)
+
+    raise TypeError(
+        "cannot infer sqlalchemy type for {}".format(repr(m.type_))
+    )
+
+
 def get_sa_args_kwargs(m: ModelField) -> dict:
     keys = tuple(m.field_info.extra.keys())
     col_kwargs = {
@@ -108,31 +136,5 @@ def get_column(m: ModelField) -> sa.Column:
     if column_type:
         return sa.Column(m.alias, column_type, *args, **col_kwargs)
 
-    if issubclass(m.type_, numbers.Number):
-        sa_type = from_number_to_sqlalchemy_type(m.type_, m)
-        return sa.Column(m.alias, sa_type, *args, **col_kwargs)
-
-    if issubclass(m.type_, (str, NameEmail, pathlib.Path)):
-        sa_type = from_str_to_sqlalchemy_type(m.type_, m)
-        return sa.Column(m.alias, sa_type, *args, **col_kwargs)
-
-    if issubclass(m.type_, uuid.UUID):
-        return sa.Column(m.alias, GUID, *args, **col_kwargs)
-
-    if issubclass(m.type_, (dt.date, dt.time, dt.timedelta)):
-        sa_type = from_datetimes_to_sqlalchemy_type(m.type_, m)
-        return sa.Column(m.alias, sa_type, *args, **col_kwargs)
-
-    if issubclass(m.type_, bytes):
-        return sa.Column(m.alias, sa.LargeBinary, *args, **col_kwargs)
-
-    if issubclass(m.type_, enum.Enum):
-        return sa.Column(m.alias, sa.Enum(m.type_), *args, **col_kwargs)
-
-    if issubclass(m.type_, ipaddress._IPAddressBase):
-        sa_type = from_ipaddress_to_sqlalchemy_type(m.type_, m)
-        return sa.Column(m.alias, sa_type, *args, **col_kwargs)
-
-    raise TypeError(
-        "cannot infer sqlalchemy type for {}".format(repr(m.type_))
-    )
+    sa_type = get_type(m)
+    return sa.Column(m.alias, sa_type, *args, **col_kwargs)
