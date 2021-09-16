@@ -30,28 +30,18 @@ def Field(
     sa_unique: Optional[bool] = None,
     sa_args: List[Any] = None,
     sa_foreign_key: Optional[ForeignKey] = None,
-    sa_fk: str = None,
+    sa_fk: Optional[ForeignKey] = None,
+    sa_pk: Optional[bool] = False,
     **extra: Any,
 ) -> Any:
     extra["sa_primary_key"] = sa_primary_key
+    extra["sa_pk"] = sa_pk
     extra["sa_nullable"] = sa_nullable
     extra["sa_index"] = sa_index
     extra["sa_unique"] = sa_unique
     extra["sa_args"] = sa_args or []
-
-    if sa_foreign_key is not None:
-        if sa_fk:
-            raise RuntimeError(
-                "Passing sa_fk is not supported when "
-                "also passing a sa_foreign_key"
-            )
-        extra["sa_args"].append(sa_foreign_key)
-    elif sa_fk:
-        fk_kwargs = {
-            k[6:]: v for k, v in extra.items() if k.startswith("sa_fk_")
-        }
-        fk = ForeignKey(sa_fk, **fk_kwargs)
-        extra["sa_args"].append(fk)
+    extra["sa_foreign_key"] = sa_foreign_key
+    extra["sa_fk"] = sa_fk
 
     field_info = FieldInfo(
         default,

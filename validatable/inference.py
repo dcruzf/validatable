@@ -134,17 +134,21 @@ def get_sa_args_kwargs(m: ModelField) -> dict:
     col_kwargs = {
         k[3:]: m.field_info.extra.pop(k) for k in keys if k.startswith("sa_")
     }
-    return col_kwargs
+    pk = col_kwargs.pop("pk", False)
+    col_kwargs["primary_key"] = col_kwargs.get("primary_key") or pk
+    fk = col_kwargs.pop("fk", None) or col_kwargs.pop("foreign_key", None)
+    args = col_kwargs.pop("args", [])
+    args.append(fk)
+    return args, col_kwargs
 
 
 def get_column(m: ModelField) -> sa.Column:
-    col_kwargs = get_sa_args_kwargs(m)
+    args, col_kwargs = get_sa_args_kwargs(m)
     column = col_kwargs.pop("column", None)
 
     if isinstance(column, sa.Column):
         return prepare_column_name(column, m.alias)
 
-    args = col_kwargs.pop("args", [])
     column_type = col_kwargs.pop("type", None) or col_kwargs.pop("type_", None)
 
     if column_type:
