@@ -20,7 +20,7 @@ GITEMOJIS=(
     ':gear:,⚙️.,ci'
     ':hammer_and_wrench:,🛠️.,refactor'
     ':heavy_check_mark:,✔️.,test'
-    ':orange_book:,📙,docs'
+    ':notebook_with_decorative_cover:,📔,docs'
     ':peacock:,🦚,style'
 )
 
