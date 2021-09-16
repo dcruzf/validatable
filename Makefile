@@ -32,3 +32,6 @@ flake8:
 check: flake8
 	@black --check .
 	@isort --check .
+
+c:
+	@./commit.sh
