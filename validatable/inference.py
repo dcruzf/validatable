@@ -136,8 +136,9 @@ def get_sa_args_kwargs(m: ModelField) -> dict:
     }
     pk = col_kwargs.pop("pk", False)
     col_kwargs["primary_key"] = col_kwargs.get("primary_key") or pk
-    fk = col_kwargs.pop("fk", None) or col_kwargs.pop("foreign_key", None)
     args = col_kwargs.pop("args", [])
+    fk = col_kwargs.pop("fk", None)
+    fk = col_kwargs.pop("foreign_key", None) or fk
     args.append(fk)
     return args, col_kwargs
 
