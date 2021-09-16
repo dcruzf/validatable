@@ -113,6 +113,3 @@ class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
         return cls.__sa_table__.join(
             right, onclause=onclause, isouter=isouter, full=full
         )
-
-
-sa.Table
