@@ -2,6 +2,6 @@
 <img  width="150" height="150" src="./docs/img/V.svg">
 </p>
 
-# **ValidaTable**
+<h1 align="center">Validatable</h1>
 
-ValidaTable provides a single class definition for SqlAlchemy Table and Pydantic BaseModel.
+ValidaTable provides a single class definition for SqlAlchemy and Pydantic.
