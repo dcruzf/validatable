@@ -45,6 +45,9 @@ class CaseEnum(enum.Enum):
     c: str = "c"
 
 
+MAX_LENGTH: int = 10
+
+
 class ModelCase(BaseModel):
 
     id: int = Field(sa_primary_key=True)
@@ -53,21 +56,24 @@ class ModelCase(BaseModel):
     uuid3: UUID3
     uuid4: UUID4
     uuid5: UUID5
-    python_int: int = 1
+    python_int: int
     con_int: conint(strict=True)
-    python_float: float = 1.23
-    con_float: confloat(strict=True) = 1.23
-    python_decimal: Decimal = 1.23
+    python_float: float
+    con_float: confloat(strict=True)
+    python_decimal: Decimal
     con_decimal: condecimal(max_digits=10)
     python_str: str
-    python_str_max: str = Field(max_length=10)
-    con_str: constr(max_length=10)
-    con_str_curtain: constr(curtail_length=9)
-    con_str_curtain_max: constr(curtail_length=9, max_length=20)
+    python_str_max: str = Field(max_length=MAX_LENGTH)
+    con_str: constr(max_length=MAX_LENGTH)
+    con_str_curtain: constr(curtail_length=MAX_LENGTH)
+    con_str_curtain_max: constr(
+        curtail_length=MAX_LENGTH, max_length=2 * MAX_LENGTH
+    )
     email_str: EmailStr
     name_email: NameEmail
     python_bytes: bytes
-    con_bytes: conbytes(max_length=10)
+    python_bytes_max: bytes = Field(max_length=MAX_LENGTH)
+    con_bytes: conbytes(max_length=MAX_LENGTH)
     python_path: pathlib.Path
     ipv4: IPv4Address
     ipv4i: IPv4Interface
@@ -176,46 +182,46 @@ def test_get_column_python_str_field_max_length():
     python_str = ModelCase.__fields__.get("python_str_max")
     col = get_column(python_str)
     assert col.type.__class__ == sa.String
-    assert col.type.length == 10
+    assert col.type.length == MAX_LENGTH
 
 
 def test_get_column_con_str():
     """
-    WHEN called with ConstrainedStringValue with max_length=10
-    THEN the SqlAlchemy type is String(10)
+    WHEN called with ConstrainedStringValue with max_length=MAX_LENGTH
+    THEN the SqlAlchemy type is String(MAX_LENGTH)
     """
     con_str = ModelCase.__fields__.get("con_str")
     col = get_column(con_str)
     assert col.type.__class__ == sa.String
-    assert col.type.length == 10
+    assert col.type.length == MAX_LENGTH
 
 
 def test_get_column_con_str_curtain():
     """
-    WHEN called with ConstrainedStringValue with max_length=10
-    THEN the SqlAlchemy type is String(10)
+    WHEN called with ConstrainedStringValue with max_length=MAX_LENGTH
+    THEN the SqlAlchemy type is String(MAX_LENGTH)
     """
     con_str = ModelCase.__fields__.get("con_str_curtain")
     col = get_column(con_str)
     assert col.type.__class__ == sa.String
-    assert col.type.length == 9
+    assert col.type.length == MAX_LENGTH
 
 
 def test_get_column_con_str_curtain_and_max_length():
     """
-    WHEN called with ConstrainedStringValue with max_length=10
-    THEN the SqlAlchemy type is String(10)
+    WHEN called with ConstrainedStringValue with max_length=2*MAX_LENGTH
+    THEN the SqlAlchemy type is String(2*MAX_LENGTH)
     """
     con_str = ModelCase.__fields__.get("con_str_curtain_max")
     col = get_column(con_str)
     assert col.type.__class__ == sa.String
-    assert col.type.length == 20
+    assert col.type.length == 2 * MAX_LENGTH
 
 
 def test_get_column_email_str():
     """
-    WHEN called with ConstrainedStringValue with max_length=10
-    THEN the SqlAlchemy type is String(10)
+    WHEN called with ConstrainedStringValue with max_length=MAX_LENGTH
+    THEN the SqlAlchemy type is String(MAX_LENGTH)
     """
     email_str = ModelCase.__fields__.get("email_str")
     col = get_column(email_str)
@@ -225,8 +231,8 @@ def test_get_column_email_str():
 
 def test_get_column_name_email():
     """
-    WHEN called with ConstrainedStringValue with max_length=10
-    THEN the SqlAlchemy type is String(10)
+    WHEN called with ConstrainedStringValue with max_length=MAX_LENGTH
+    THEN the SqlAlchemy type is String(MAX_LENGTH)
     """
     name_email = ModelCase.__fields__.get("name_email")
     col = get_column(name_email)
@@ -243,6 +249,17 @@ def test_get_column_python_bytes():
     assert col.type.__class__ == sa.LargeBinary
 
 
+def test_get_column_python_bytes_field_max_length():
+    """
+    WHEN called with ConstrainedBytesValue
+    THEN the SqlAlchemy type is LargeBinary
+    """
+    con_bytes = ModelCase.__fields__.get("python_bytes_max")
+    col = get_column(con_bytes)
+    assert col.type.__class__ == sa.LargeBinary
+    assert col.type.length == MAX_LENGTH
+
+
 def test_get_column_con_bytes():
     """
     WHEN called with ConstrainedBytesValue
@@ -251,6 +268,7 @@ def test_get_column_con_bytes():
     con_bytes = ModelCase.__fields__.get("con_bytes")
     col = get_column(con_bytes)
     assert col.type.__class__ == sa.LargeBinary
+    assert col.type.length == MAX_LENGTH
 
 
 def test_get_column_python_path():

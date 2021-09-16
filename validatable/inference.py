@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from pydantic import EmailStr, NameEmail
 from pydantic.fields import ModelField
 from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
-from pydantic.types import ConstrainedStr
+from pydantic.types import ConstrainedStr, ConstrainedDecimal, ConstrainedBytes
 
 from validatable.generic_types import GUID, AutoString
 
@@ -41,6 +41,19 @@ def from_str_to_sqlalchemy_type(python_type: type, m: ModelField):
     return AutoString
 
 
+def from_bytes_to_sqlalchemy_type(python_type: type, m: ModelField):
+    if m.field_info.max_length:
+        return sa.LargeBinary(m.field_info.max_length)
+    if issubclass(python_type, ConstrainedBytes):
+        return sa.LargeBinary(python_type.max_length)
+
+    # import pdb
+
+    # pdb.set_trace()
+
+    return sa.LargeBinary
+
+
 def from_number_to_sqlalchemy_type(python_type: type, m: ModelField):
 
     if issubclass(python_type, int):
@@ -48,6 +61,11 @@ def from_number_to_sqlalchemy_type(python_type: type, m: ModelField):
 
     if issubclass(python_type, float):
         return sa.Float
+
+    if issubclass(python_type, ConstrainedDecimal):
+        return sa.Numeric(
+            precision=python_type.max_digits, scale=python_type.decimal_places
+        )
 
     if issubclass(python_type, decimal.Decimal):
         return sa.Numeric
@@ -102,7 +120,7 @@ def get_type(m: ModelField):
         return from_datetimes_to_sqlalchemy_type(m.type_, m)
 
     if issubclass(m.type_, bytes):
-        return sa.LargeBinary
+        return from_bytes_to_sqlalchemy_type(m.type_, m)
 
     if issubclass(m.type_, enum.Enum):
         return sa.Enum(m.type_)
