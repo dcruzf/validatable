@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from pydantic import EmailStr, NameEmail
 from pydantic.fields import ModelField
 from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
-from pydantic.types import ConstrainedStr, ConstrainedDecimal, ConstrainedBytes
+from pydantic.types import ConstrainedBytes, ConstrainedDecimal, ConstrainedStr
 
 from validatable.generic_types import GUID, AutoString
 
@@ -46,10 +46,6 @@ def from_bytes_to_sqlalchemy_type(python_type: type, m: ModelField):
         return sa.LargeBinary(m.field_info.max_length)
     if issubclass(python_type, ConstrainedBytes):
         return sa.LargeBinary(python_type.max_length)
-
-    # import pdb
-
-    # pdb.set_trace()
 
     return sa.LargeBinary
 
