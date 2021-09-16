@@ -25,13 +25,13 @@ def Field(
     allow_mutation: bool = True,
     regex: str = None,
     sa_primary_key: Optional[bool] = False,
+    sa_pk: Optional[bool] = False,
     sa_nullable: Optional[bool] = None,
     sa_index: Optional[bool] = None,
     sa_unique: Optional[bool] = None,
     sa_args: List[Any] = None,
     sa_foreign_key: Optional[ForeignKey] = None,
     sa_fk: Optional[ForeignKey] = None,
-    sa_pk: Optional[bool] = False,
     **extra: Any,
 ) -> Any:
     extra["sa_primary_key"] = sa_primary_key
