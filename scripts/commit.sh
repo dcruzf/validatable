@@ -1,7 +1,7 @@
 menu_from_array ()
 {
 select item; do
-# Check the selected menu item number
+
 if [ 1 -le "$REPLY" ] && [ "$REPLY" -le $# ];
 then
 break;
@@ -21,7 +21,6 @@ GITEMOJIS=(':gift:,🎁,Add'
            ':orange_book:,📙,Docs'
            ':seedling:,🌱,Create')
 
-# Call the subroutine to create the menu
 ITEMS=()
 for I in ${GITEMOJIS[@]}; do ITEMS+=("$(echo -n $I | cut --output-delimiter=' ' -d ',' -f 2,3)"); done;
 menu_from_array "${ITEMS[@]}"

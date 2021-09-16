@@ -34,4 +34,4 @@ check: flake8
 	@isort --check .
 
 c:
-	@./commit.sh
+	@./scripts/commit.sh
