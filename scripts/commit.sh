@@ -11,15 +11,18 @@ fi
 done
 }
 
-GITEMOJIS=(':gift:,🎁,Add'
-           ':zap:,⚡,Update'
-           ':fire:,🔥,Delete'
-           ':bug:,🐛,Fix'
-           ':gear:,⚙️.,CI'
-           ':hammer_and_wrench:,🛠️.,Refactor'
-           ':heavy_check_mark:,✔️.,Test'
-           ':orange_book:,📙,Docs'
-           ':seedling:,🌱,Create')
+GITEMOJIS=(
+    ':gift:,🎁,add'
+    ':seedling:,🌱,create'
+    ':zap:,⚡,update'
+    ':fire:,🔥,delete'
+    ':bug:,🐛,fix'
+    ':gear:,⚙️.,ci'
+    ':hammer_and_wrench:,🛠️.,refactor'
+    ':heavy_check_mark:,✔️.,test'
+    ':orange_book:,📙,docs'
+    ':peacock:,🦚,style'
+)
 
 ITEMS=()
 for I in ${GITEMOJIS[@]}; do ITEMS+=("$(echo -n $I | cut --output-delimiter=' ' -d ',' -f 2,3)"); done;

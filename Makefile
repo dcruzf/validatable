@@ -33,5 +33,5 @@ check: flake8
 	@black --check .
 	@isort --check .
 
-c:
+c: format
 	@./scripts/commit.sh
