@@ -4,7 +4,7 @@ from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 from sqlalchemy.sql.schema import MetaData
 
-from validatable.inference import get_column
+from .inference import get_column
 
 
 class ValidatableMetaclass(ModelMetaclass):

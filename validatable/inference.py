@@ -12,7 +12,7 @@ from pydantic.fields import ModelField
 from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
 from pydantic.types import ConstrainedBytes, ConstrainedDecimal, ConstrainedStr
 
-from validatable.generic_types import GUID, AutoString
+from .generic_types import GUID, AutoString
 
 
 def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
