@@ -1,2 +1,0 @@
-pydantic[email]==1.8.2
-sqlalchemy==1.4.23
