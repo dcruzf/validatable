@@ -14,25 +14,25 @@ cov:
 
 .PHONY: format
 format:
-	@isort . --force-single-line-imports > /dev/null
-	@autoflake -r -i --remove-all-unused-imports --remove-unused-variables ./validatable/
-	@isort . > /dev/null
-	@black .
+	@isort validatable tests --force-single-line-imports > /dev/null
+	@autoflake -r -i --remove-all-unused-imports --remove-unused-variables validatable tests
+	@isort validatable tests > /dev/null
+	@black validatable tests
 
 
 .PHONY: lint
 lint:
 	@flake8 validatable/ tests/
-	@black --check .
-	@isort --check .
+	@isort --check --diff validatable tests
+	@black --check --diff validatable tests
 
 .PHONY: install-testing
 install-testing:
-	@pip install tests/requirements-testing.txt
+	@pip install -r tests/requirements-testing.txt
 
 .PHONY: install-linting
 install-linting:
-	@pip install tests/requirements-linting.txt
+	@pip install -r tests/requirements-linting.txt
 
 .PHONY: install
 install:
