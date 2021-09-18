@@ -5,19 +5,6 @@ on:
       - main
 
 jobs:
-  test-linux:
-    name: test py${{ matrix.python-version }} on linux
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
-    env:
-      PYTHON: ${{ matrix.python-version }}
-      OS: ubuntu
-
-jobs:
-
   lint:
     runs-on: ubuntu-latest
 
