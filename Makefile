@@ -35,8 +35,7 @@ install-linting:
 	@pip install -r tests/requirements-linting.txt
 
 .PHONY: install
-install install-testing:
-	@pip install -U pip
+install: install-testing
 	@pip install -e .
 
 .PHONY: clean
