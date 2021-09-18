@@ -1,0 +1,4 @@
+flake8-bugbear
+black
+isort
+autoflake

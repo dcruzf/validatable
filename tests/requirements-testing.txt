@@ -1,0 +1,5 @@
+pydantic[email]
+pytest
+coverage[toml]
+pytest-cov
+faker
