@@ -26,9 +26,6 @@ lint:
 	@black --check .
 	@isort --check .
 
-commit: lint
-	@./scripts/commit.sh
-
 .PHONY: install-testing
 install-testing:
 	@pip install tests/requirements-testing.txt
