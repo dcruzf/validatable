@@ -154,9 +154,9 @@ class ModelCaseStrBytes(Base):
             faker.file_path(depth=random.randint(1, 5))
         )
     )
-    python_bytes: bytes = Field(default_factory=lambda: random.randbytes(10))
+    python_bytes: bytes = Field(default_factory=lambda: os.urandom(10))
     con_bytes: conbytes(max_length=10) = Field(
-        default_factory=lambda: random.randbytes(10)
+        default_factory=lambda: os.urandom(10)
     )
 
 
