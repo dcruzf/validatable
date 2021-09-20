@@ -18,6 +18,7 @@ jobs:
 
       - name: install
         run: |
+          pip install -U pip
           make install-linting
           pip freeze
       - name: lint
@@ -44,6 +45,7 @@ jobs:
 
       - name: install
         run: |
+          pip install -U pip
           make install
           pip freeze
 
@@ -77,6 +79,7 @@ jobs:
 
       - name: install
         run: |
+          pip install -U pip
           make install
           pip freeze
 
