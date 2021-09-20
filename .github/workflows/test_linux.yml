@@ -1,4 +1,4 @@
-name: CI
+name: Test
 on:
   push:
     branches:
@@ -7,24 +7,6 @@ on:
       - "validatable/**"
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: set up python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: install
-        run: |
-          make install-linting
-          pip freeze
-      - name: lint
-        run: make lint
-
   test-linux:
     name: test py${{ matrix.python-version }} on linux
     runs-on: ubuntu-latest
@@ -57,7 +39,7 @@ jobs:
         run: |
           make cov
 
-  test-windows-mac:
+  test-mac:
     name: test py${{ matrix.python-version }} on ${{ matrix.os }}
     strategy:
       fail-fast: false
