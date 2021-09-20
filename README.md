@@ -24,18 +24,10 @@ pip install validatable
 
 ```py
 import uuid
-from typing import Optional
 
-from validatable import (
-    UUID4,
-    BaseTable,
-    EmailStr,
-    Field,
-    ForeignKey,
-    MetaData,
-    create_engine,
-    validator,
-)
+from validatable import UUID4, BaseTable, Field
+from validatable import ForeignKey as fk
+from validatable import MetaData, create_engine, validator
 
 
 class Base(BaseTable):
@@ -55,9 +47,7 @@ class User(Base):
 
 class Recipe(Base):
     title: str = Field(max_length=150, sa_nullable=False, sa_unique=True)
-    owner: UUID4 = Field(
-        sa_foreign_key=ForeignKey(User.c.id, ondelete="CASCADE")
-    )
+    owner: UUID4 = Field(sa_foreign_key=fk(User.c.id, ondelete="CASCADE"))
 
 
 engine = create_engine("sqlite:///:memory:")
@@ -75,12 +65,15 @@ with engine.connect() as conn:
     result = conn.execute(User.select())
     user = result.fetchone()
     print(User.parse_obj(user))
-    # id=UUID('193006cb-f10b-47e6-8bee-9fbabc5727ca') username='john'
+    # id=UUID('193006cb-f10b-47e6-8bee-9fbabc5727ca')
+    # username='john'
 
     result = conn.execute(Recipe.select())
     recipe = result.fetchone()
     print(Recipe.parse_obj(recipe))
-    # id=UUID('f96e3a7c-67be-4b0a-bd33-134aef73585f') title='Feijoada' owner=UUID('193006cb-f10b-47e6-8bee-9fbabc5727ca')
+    # id=UUID('f96e3a7c-67be-4b0a-bd33-134aef73585f')
+    # title='Feijoada'
+    # owner=UUID('193006cb-f10b-47e6-8bee-9fbabc5727ca')
 
 
 ```
