@@ -1,10 +1,11 @@
-name: Test
+name: Test Linux
 on:
   push:
     branches:
       - main
     paths:
       - "validatable/**"
+      - "tests/**"
 
 jobs:
   test-linux:

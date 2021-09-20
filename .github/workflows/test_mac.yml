@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - "validatable/**"
+      - "tests/**"
 
 jobs:
   test-mac:
