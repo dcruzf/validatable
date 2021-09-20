@@ -8,11 +8,11 @@
 
 ## Introduction
 
-ValidaTable provides a single class definition for data validation and persistence in relational databases. It uses Pydantic and SQLAlchemy Core.
+Validatable provides a single class definition for data validation and persistence in relational databases. It uses Pydantic and SQLAlchemy Core.
 
-# Getting Started
+## Getting Started
 
-## Installation
+### Installation
 
 You can install Validatable like this:
 
@@ -20,7 +20,7 @@ You can install Validatable like this:
 pip install validatable
 ```
 
-## Simple Example
+### Simple Example
 
 ```py
 import uuid
