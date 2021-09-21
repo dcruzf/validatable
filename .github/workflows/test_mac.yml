@@ -6,8 +6,8 @@ on:
     paths:
       - "validatable/**"
       - "tests/**"
-
- test-mac:
+jobs:
+  test-mac:
     name: test py${{ matrix.python-version }} on ${{ matrix.os }}
     needs: test-linux
     runs-on: macos
