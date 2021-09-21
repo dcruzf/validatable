@@ -4,7 +4,7 @@
 
 <h1 align="center">Validatable</h1>
 
-[![Lint](https://github.com/dcruzf/validatable/actions/workflows/lint.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/lint.yml)
+[![pre-commit](https://github.com/dcruzf/validatable/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/pre-commit.yml)
 [![Test on Linux](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml)
 [![Test on MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
 

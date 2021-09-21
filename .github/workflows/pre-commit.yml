@@ -1,11 +1,8 @@
-name: Lint
+name: pre-commit
 on:
   push:
     branches:
       - main
-    paths:
-      - "validatable/**"
-      - "tests/**"
 
 jobs:
   lint:
@@ -21,7 +18,7 @@ jobs:
 
       - name: install
         run: |
-          make install-linting
+          pip install pre-commit
           pip freeze
-      - name: lint
-        run: make lint
+      - name: pre-commit
+        run: pre-commit run -a
