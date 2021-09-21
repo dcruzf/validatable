@@ -57,23 +57,23 @@ class ModelCase(BaseModel):
     uuid4: UUID4
     uuid5: UUID5
     python_int: int
-    con_int: conint(strict=True)
+    con_int: conint(strict=True)  # type: ignore
     python_float: float
-    con_float: confloat(strict=True)
+    con_float: confloat(strict=True)  # type: ignore
     python_decimal: Decimal
-    con_decimal: condecimal(max_digits=10)
+    con_decimal: condecimal(max_digits=10)  # type: ignore
     python_str: str
     python_str_max: str = Field(max_length=MAX_LENGTH)
-    con_str: constr(max_length=MAX_LENGTH)
-    con_str_curtain: constr(curtail_length=MAX_LENGTH)
-    con_str_curtain_max: constr(
+    con_str: constr(max_length=MAX_LENGTH)  # type: ignore
+    con_str_curtain: constr(curtail_length=MAX_LENGTH)  # type: ignore
+    con_str_curtain_max: constr(  # type: ignore
         curtail_length=MAX_LENGTH, max_length=2 * MAX_LENGTH
     )
     email_str: EmailStr
     name_email: NameEmail
     python_bytes: bytes
     python_bytes_max: bytes = Field(max_length=MAX_LENGTH)
-    con_bytes: conbytes(max_length=MAX_LENGTH)
+    con_bytes: conbytes(max_length=MAX_LENGTH)  # type: ignore
     python_path: pathlib.Path
     ipv4: IPv4Address
     ipv4i: IPv4Interface
@@ -326,6 +326,8 @@ def test_get_column_network_types(field: str, length: int):
     THEN the SqlAlchemy type is String(length)
     """
     network_type = ModelCase.__fields__.get(field)
+    if not network_type:
+        raise KeyError("invalid field name")
     col = get_column(network_type)
     assert col.type.__class__ == AutoString
 
@@ -345,7 +347,7 @@ def test_get_column_datetimes(field: str, sa_type):
     THEN get correct SqlAlchemy type
     """
     dt_field = ModelCase.__fields__.get(field)
-    col = get_column(dt_field)
+    col = get_column(dt_field)  # type: ignore
     assert col.type.__class__ == sa_type
 
 
@@ -368,8 +370,8 @@ def test_get_column_uuid(field: str):
     WHEN called with UUID
     THEN returns GUID
     """
-    field = ModelCase.__fields__.get(field)
-    col = get_column(field)
+    m = ModelCase.__fields__.get(field)
+    col = get_column(m)  # type: ignore
     assert col.type.__class__ == GUID
     assert col.type.python_type == uuid.UUID
 

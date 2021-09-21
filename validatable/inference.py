@@ -80,11 +80,11 @@ def from_ipaddress_to_sqlalchemy_type(python_type: type, m: ModelField):
     if issubclass(
         python_type,
         (
-            ipaddress._BaseV6,
+            ipaddress._BaseV6,  # type: ignore
             IPvAnyAddress,
             IPvAnyNetwork,
             IPvAnyInterface,
-        ),  # type: ignore
+        ),
     ):
         return AutoString
 

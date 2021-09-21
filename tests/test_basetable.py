@@ -96,7 +96,7 @@ class ModelCaseNumber(Base):
     python_int: int = Field(
         default_factory=lambda: random.randint(-2147483648, 2147483647)
     )
-    con_int: conint() = Field(
+    con_int: conint() = Field(  # type: ignore[valid-type]
         default_factory=lambda: random.randint(-2147483648, 2147483647)
     )
     python_float: float = Field(
@@ -104,7 +104,7 @@ class ModelCaseNumber(Base):
             -3.402823466e38, 1.175494351e-38
         )
     )
-    con_float: confloat() = Field(
+    con_float: confloat() = Field(  # type: ignore[valid-type]
         default_factory=lambda: random.uniform(
             -3.402823466e38, 1.175494351e-38
         )
@@ -114,7 +114,7 @@ class ModelCaseNumber(Base):
             f"{random.uniform(-1000000000, 1000000000):.10f}"
         )  # noqa E501
     )
-    con_decimal: condecimal() = Field(
+    con_decimal: condecimal() = Field(  # type: ignore[valid-type]
         default_factory=lambda: Decimal(
             f"{random.uniform(-1000000000, 1000000000):.10f}"
         )  # noqa E501
@@ -137,7 +137,7 @@ class ModelCaseStrBytes(Base):
     python_str: str = Field(
         default_factory=faker.sentence, sa_primary_key=True
     )
-    con_str: constr(max_length=10) = Field(
+    con_str: constr(max_length=10) = Field(  # type: ignore[valid-type]
         default_factory=lambda: f"{faker.sentence()}"[:10]
     )
     email_str: EmailStr = Field(default_factory=faker.email)
@@ -155,7 +155,7 @@ class ModelCaseStrBytes(Base):
         )
     )
     python_bytes: bytes = Field(default_factory=lambda: os.urandom(10))
-    con_bytes: conbytes(max_length=10) = Field(
+    con_bytes: conbytes(max_length=10) = Field(  # type: ignore[valid-type]
         default_factory=lambda: os.urandom(10)
     )
 
@@ -208,9 +208,9 @@ class ModelCaseDateTime(Base):
 
 
 class CaseEnum(enum.Enum):
-    a: int = "a"
-    b: int = "b"
-    c: int = "c"
+    a: str = "a"
+    b: str = "b"
+    c: str = "c"
 
 
 class CaseIntEnum(enum.IntEnum):
@@ -287,7 +287,9 @@ def test_raise_for_wrong_metadata():
 @pytest.mark.parametrize("model", [ModelCaseUUID() for n in range(NUM_TEST)])
 def test_database_uuid(model: ModelCaseUUID, conn):
     insert = ModelCaseUUID.insert().values(model.dict())
-    one = ModelCaseUUID.select().where(ModelCaseUUID.c.id == model.id)
+    one = ModelCaseUUID.select().where(
+        ModelCaseUUID.c.id == model.id  # type: ignore[attr-defined]
+    )
 
     conn.execute(insert)
     result = conn.execute(one)
@@ -305,7 +307,9 @@ def test_database_uuid(model: ModelCaseUUID, conn):
 def test_database_number(model: ModelCaseNumber, conn):
 
     insert = ModelCaseNumber.insert().values(model.dict())
-    one = ModelCaseNumber.select().where(ModelCaseNumber.c.id == model.id)
+    one = ModelCaseNumber.select().where(
+        ModelCaseNumber.c.id == model.id  # type: ignore[attr-defined]
+    )
 
     conn.execute(insert)
     result = conn.execute(one)
@@ -322,7 +326,9 @@ def test_database_number(model: ModelCaseNumber, conn):
 def test_database_strbytes(model: ModelCaseStrBytes, conn):
 
     insert = ModelCaseStrBytes.insert().values(model.dict())
-    one = ModelCaseStrBytes.select().where(ModelCaseStrBytes.c.id == model.id)
+    one = ModelCaseStrBytes.select().where(
+        ModelCaseStrBytes.c.id == model.id  # type: ignore[attr-defined]
+    )
 
     conn.execute(insert)
     result = conn.execute(one)
@@ -339,7 +345,9 @@ def test_database_strbytes(model: ModelCaseStrBytes, conn):
 def test_database_network(model: ModelCaseNetwork, conn):
 
     insert = ModelCaseNetwork.insert().values(model.dict())
-    one = ModelCaseNetwork.select().where(ModelCaseNetwork.c.id == model.id)
+    one = ModelCaseNetwork.select().where(
+        ModelCaseNetwork.c.id == model.id  # type: ignore[attr-defined]
+    )
 
     conn.execute(insert)
     result = conn.execute(one)
@@ -356,7 +364,9 @@ def test_database_network(model: ModelCaseNetwork, conn):
 def test_database_datetime(model: ModelCaseDateTime, conn):
 
     insert = ModelCaseDateTime.insert().values(model.dict())
-    one = ModelCaseDateTime.select().where(ModelCaseDateTime.c.id == model.id)
+    one = ModelCaseDateTime.select().where(
+        ModelCaseDateTime.c.id == model.id  # type: ignore[attr-defined]
+    )
 
     conn.execute(insert)
     result = conn.execute(one)
@@ -371,7 +381,9 @@ def test_database_datetime(model: ModelCaseDateTime, conn):
 def test_database_enum(model: ModelCaseEnum, conn):
 
     insert = ModelCaseEnum.insert().values(model.dict())
-    one = ModelCaseEnum.select().where(ModelCaseEnum.c.id == model.id)
+    one = ModelCaseEnum.select().where(
+        ModelCaseEnum.c.id == model.id  # type: ignore[attr-defined]
+    )
 
     conn.execute(insert)
     result = conn.execute(one)
@@ -430,7 +442,9 @@ class LeftTable(Base):
 
 class RightTable(Base):
     b: str = "b"
-    left_id: UUID4 = Field(sa_args=[sa.ForeignKey(LeftTable.c.id)])
+    left_id: UUID4 = Field(
+        sa_args=[sa.ForeignKey(LeftTable.c.id)]  # type: ignore[attr-defined]
+    )
 
 
 def test_database_join_with_pydantic_model(conn):

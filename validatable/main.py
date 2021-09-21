@@ -1,7 +1,10 @@
-import sqlalchemy as sa
+from typing import Any, Dict, List
+
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
+from sqlalchemy import Column, Table
+from sqlalchemy.sql.base import ImmutableColumnCollection
 from sqlalchemy.sql.schema import MetaData
 
 from .inference import get_column
@@ -27,7 +30,7 @@ class ValidatableMetaclass(ModelMetaclass):
     def __new__(mcls, name, bases, namespace, metadata=None, **kwargs):
 
         table = namespace.get("__sa_table__")
-        if isinstance(table, sa.Table):
+        if isinstance(table, Table):
             return super().__new__(mcls, name, bases, namespace, **kwargs)
 
         metadata = namespace.get("__sa_metadata__", None)
@@ -45,27 +48,29 @@ class ValidatableMetaclass(ModelMetaclass):
             if hasattr(v, "__class__") and isinstance(v, ModelField)
         ]
 
-        cls.__sa_table__ = sa.Table(
+        cls.__sa_table__ = Table(
             tablename, metadata, *columns, *table_args, **table_kwargs
         )
         return cls
 
     @property
-    def c(cls):
-        return cls.__sa_table__.c
+    def c(cls) -> ImmutableColumnCollection[Column]:
+        return cls.__sa_table__.c  # type: ignore[attr-defined]
 
     @property
     def metadata(cls) -> MetaData:
-        return cls.__sa_metadata__
+        return cls.__sa_metadata__  # type: ignore[attr-defined]
 
 
 class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
+    __sa_table__: Table
+    __sa_metadata__: MetaData
+    __sa_table_args__: List[Any]
+    __sa_table_kwargs__: Dict[str, Any]
+
     @property
-    def c(self):
-        """
-        columns
-        """
-        return self.__sa_table__.c
+    def c(cls) -> ImmutableColumnCollection[Column]:
+        return cls.__sa_table__.c
 
     @classmethod
     def insert(cls, values=None, inline=False, **kwargs):
