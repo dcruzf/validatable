@@ -4,3 +4,4 @@ isort
 autoflake
 sqlalchemy[mypy]
 mypy
+pydantic
