@@ -26,7 +26,7 @@ lint:
 	@flake8 validatable/ tests/
 	@isort --check --diff validatable tests
 	@black --check --diff validatable tests
-	@mypy --show-error-codes --pretty validatable tests 
+	@mypy --show-error-codes --pretty validatable tests
 
 .PHONY: install-testing
 install-testing:
