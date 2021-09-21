@@ -5,6 +5,7 @@ import ipaddress
 import numbers
 import pathlib
 import uuid
+from typing import Any, Dict, Tuple
 
 import sqlalchemy as sa
 from pydantic import EmailStr, NameEmail
@@ -73,12 +74,17 @@ def from_number_to_sqlalchemy_type(python_type: type, m: ModelField):
 
 def from_ipaddress_to_sqlalchemy_type(python_type: type, m: ModelField):
 
-    if issubclass(python_type, ipaddress._BaseV4):
+    if issubclass(python_type, ipaddress._BaseV4):  # type: ignore
         return AutoString
 
     if issubclass(
         python_type,
-        (ipaddress._BaseV6, IPvAnyAddress, IPvAnyNetwork, IPvAnyInterface),
+        (
+            ipaddress._BaseV6,
+            IPvAnyAddress,
+            IPvAnyNetwork,
+            IPvAnyInterface,
+        ),  # type: ignore
     ):
         return AutoString
 
@@ -129,7 +135,7 @@ def get_type(m: ModelField):
     )
 
 
-def get_sa_args_kwargs(m: ModelField) -> dict:
+def get_sa_args_kwargs(m: ModelField) -> Tuple[Any, Dict[str, Any]]:
     keys = tuple(m.field_info.extra.keys())
     col_kwargs = {
         k[3:]: m.field_info.extra.pop(k) for k in keys if k.startswith("sa_")
