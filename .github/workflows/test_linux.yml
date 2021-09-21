@@ -1,4 +1,4 @@
-name: Test on Linux
+name: test on Linux
 on:
   push:
     branches:

@@ -5,8 +5,8 @@
 <h1 align="center">Validatable</h1>
 
 [![pre-commit](https://github.com/dcruzf/validatable/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/pre-commit.yml)
-[![Test on Linux](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml)
-[![Test on MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
+[![test on Linux](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml)
+[![test on MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
 
 ## Introduction
 

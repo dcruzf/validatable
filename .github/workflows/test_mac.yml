@@ -1,4 +1,4 @@
-name: Test on MacOS
+name: test on MacOS
 on:
   push:
     branches:
