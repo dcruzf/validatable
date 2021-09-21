@@ -28,16 +28,9 @@ lint:
 	@black --check --diff validatable tests
 	@mypy --show-error-codes --pretty validatable tests
 
-.PHONY: install-testing
-install-testing:
-	@pip install -r tests/requirements-testing.txt
-
-.PHONY: install-linting
-install-linting:
-	@pip install -r tests/requirements-linting.txt
-
 .PHONY: install
-install: install-testing
+install:
+	@pip install -r tests/requirements-testing.txt
 	@pip install -e .
 
 .PHONY: clean
