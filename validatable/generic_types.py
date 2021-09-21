@@ -20,7 +20,7 @@ class GUID(sa.types.TypeDecorator):
         else:
             return dialect.type_descriptor(sa.types.BINARY(16))
 
-    def process_bind_param(self, value: uuid.UUID, dialect):
+    def process_bind_param(self, value, dialect):
         if value is None:
             return value
         if isinstance(value, str):
@@ -57,7 +57,7 @@ class AutoString(sa.types.TypeDecorator):
             return dialect.type_descriptor(sa.types.String(self.length))
         return dialect.type_descriptor(sa.types.String)
 
-    def process_bind_param(self, value: uuid.UUID, dialect):
+    def process_bind_param(self, value, dialect):
         if value is None:
             return value
         if isinstance(value, str):
