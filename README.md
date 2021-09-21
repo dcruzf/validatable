@@ -6,7 +6,7 @@
 
 [![Lint](https://github.com/dcruzf/validatable/actions/workflows/lint.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/lint.yml)
 [![Test on Linux](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml)
-[![Test MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
+[![Test on MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
 
 ## Introduction
 
