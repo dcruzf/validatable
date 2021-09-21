@@ -4,7 +4,9 @@
 
 <h1 align="center">Validatable</h1>
 
-[![CI](https://github.com/dcruzf/validatable/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dcruzf/validatable/actions/workflows/ci.yml)
+[![Test MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
+[![Test on Linux](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml)
+[![Test MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
 
 ## Introduction
 

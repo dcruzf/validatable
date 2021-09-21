@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
-from sqlalchemy import Column, Table
+from sqlalchemy import Table
 from sqlalchemy.sql.base import ImmutableColumnCollection
 from sqlalchemy.sql.schema import MetaData
 
@@ -54,7 +54,7 @@ class ValidatableMetaclass(ModelMetaclass):
         return cls
 
     @property
-    def c(cls) -> ImmutableColumnCollection[Column]:
+    def c(cls) -> ImmutableColumnCollection:
         return cls.__sa_table__.c  # type: ignore[attr-defined]
 
     @property
@@ -69,7 +69,7 @@ class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
     __sa_table_kwargs__: Dict[str, Any]
 
     @property
-    def c(cls) -> ImmutableColumnCollection[Column]:
+    def c(cls) -> ImmutableColumnCollection:
         return cls.__sa_table__.c
 
     @classmethod
