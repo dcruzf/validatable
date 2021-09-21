@@ -1,13 +1,12 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Set
 
 from pydantic import BaseModel
-from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 from sqlalchemy import Table
 from sqlalchemy.sql.base import ImmutableColumnCollection
 from sqlalchemy.sql.schema import MetaData
 
-from .inference import get_column
+from .inference import get_table
 
 
 class ValidatableMetaclass(ModelMetaclass):
@@ -39,17 +38,25 @@ class ValidatableMetaclass(ModelMetaclass):
             return super().__new__(mcls, name, bases, namespace, **kwargs)
 
         tablename = namespace.get("__sa_tablename__", name.lower())
-        table_args = namespace.get("__sa_table_args__", [])
-        table_kwargs = namespace.get("__sa_table_kwargs__", {})
-        cls = super().__new__(mcls, name, bases, namespace, **kwargs)
-        columns = [
-            get_column(v)
-            for k, v in cls.__fields__.items()
-            if hasattr(v, "__class__") and isinstance(v, ModelField)
-        ]
+        namespace["__sa_tablename__"] = tablename
 
-        cls.__sa_table__ = Table(
-            tablename, metadata, *columns, *table_args, **table_kwargs
+        table_args = namespace.get("__sa_table_args__", [])
+        namespace["__sa_table_args__"] = table_args
+
+        table_kwargs = namespace.get("__sa_table_kwargs__", {})
+        namespace["__sa_table_kwargs__"] = table_kwargs
+
+        exclude = namespace.get("__sa_exclude__")
+
+        cls = super().__new__(mcls, name, bases, namespace, **kwargs)
+
+        cls.__sa_table__ = get_table(
+            tablename,
+            metadata,
+            cls.__fields__,
+            table_args,
+            table_kwargs,
+            exclude,
         )
         return cls
 
@@ -67,6 +74,7 @@ class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
     __sa_metadata__: MetaData
     __sa_table_args__: List[Any]
     __sa_table_kwargs__: Dict[str, Any]
+    __sa_exclude__: Optional[Set[str]] = None
 
     @property
     def c(cls) -> ImmutableColumnCollection:

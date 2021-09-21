@@ -5,7 +5,7 @@ import ipaddress
 import numbers
 import pathlib
 import uuid
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import sqlalchemy as sa
 from pydantic import EmailStr, NameEmail
@@ -163,3 +163,26 @@ def get_column(m: ModelField) -> sa.Column:
 
     sa_type = get_type(m)
     return sa.Column(m.alias, sa_type, *args, **col_kwargs)
+
+
+def is_model_field(v: Any) -> bool:
+    return hasattr(v, "__class__") and isinstance(v, ModelField)
+
+
+def get_table(
+    name: str,
+    metadata: sa.MetaData,
+    fields: Dict[str, Any],
+    table_args: List[str],
+    table_kwargs: Dict[str, Any],
+    exclude: Optional[Set[str]] = None,
+) -> sa.Table:
+
+    if exclude is None:
+        exclude = set()
+    columns = [
+        get_column(v)
+        for k, v in fields.items()
+        if k not in exclude and is_model_field(v)
+    ]
+    return sa.Table(name, metadata, *columns, *table_args, **table_kwargs)
