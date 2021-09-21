@@ -7,19 +7,18 @@ on:
       - "validatable/**"
       - "tests/**"
 
-jobs:
-  test-mac:
+ test-mac:
     name: test py${{ matrix.python-version }} on ${{ matrix.os }}
+    needs: test-linux
+    runs-on: macos
     strategy:
       fail-fast: false
       matrix:
-        os: [macos]
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10.0-rc.2"]
     env:
       PYTHON: ${{ matrix.python-version }}
-      OS: ${{ matrix.os }}
+      OS: macos
 
-    runs-on: ${{ format('{0}-latest', matrix.os) }}
     steps:
       - uses: actions/checkout@v2
 
