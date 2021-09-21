@@ -6,19 +6,20 @@ on:
     paths:
       - "validatable/**"
       - "tests/**"
+      - ".github/workflows/test_mac.yml"
   pull_request:
     branches:
       - main
     paths:
       - "validatable/**"
       - "tests/**"
+      - ".github/workflows/test_mac.yml"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   test-mac:
     name: test py${{ matrix.python-version }} on ${{ matrix.os }}
-    needs: test-linux
     runs-on: macos
     strategy:
       fail-fast: false
