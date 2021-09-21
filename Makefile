@@ -14,11 +14,10 @@ cov:
 
 .PHONY: format
 format:
-	@isort validatable tests --force-single-line-imports > /dev/null
+	@isort validatable tests . --force-single-line-imports > /dev/null
 	@autoflake -r -i --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --remove-unused-variables --expand-star-imports validatable tests
-	@isort validatable tests > /dev/null
-	@black validatable tests
-	@mypy --show-error-codes --pretty validatable tests
+	@isort validatable tests . > /dev/null
+	@black validatable tests .
 
 
 .PHONY: lint
