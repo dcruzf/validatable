@@ -178,8 +178,7 @@ def get_table(
     exclude: Optional[Set[str]] = None,
 ) -> sa.Table:
 
-    if exclude is None:
-        exclude = set()
+    exclude = exclude or set()
     columns = [
         get_column(v)
         for k, v in fields.items()
