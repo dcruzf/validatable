@@ -1,6 +1,6 @@
 services:
   postgresql:
-    image: postgres:latest-alpine
+    image: postgres:13-alpine
     ports:
       - 5432:5432
     restart: always
@@ -8,3 +8,14 @@ services:
       POSTGRES_USER: validatable
       POSTGRES_PASSWORD: password
       POSTGRES_DB: db
+
+  mariadb:
+    image: mariadb:latest
+    ports:
+      - 3306:3306
+    restart: always
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: 1
+      MARIADB_USER: validatable
+      MARIADB_PASSWORD: password
+      MARIADB_DATABASE: db
