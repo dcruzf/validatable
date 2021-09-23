@@ -18,9 +18,9 @@ Validatable provides a single class definition for data validation and persisten
 
 You can install Validatable like this:
 
-<p align="center">
-<img  width="500" src="./docs/img/readme_install.svg">
-</p>
+```
+pip install validatable
+```
 
 ### Simple Example
 
