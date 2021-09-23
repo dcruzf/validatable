@@ -22,6 +22,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Daniel França",
     author_email="daniel@ci.ufpb.br",
+    url="https://github.com/dcruzf/validatable",
     packages=["validatable"],
     license="MIT",
     python_requires=">=3.6.1",
