@@ -27,7 +27,7 @@ setup(
     python_requires=">=3.6.1",
     install_requires=["pydantic", "sqlalchemy"],
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
