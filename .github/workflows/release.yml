@@ -12,9 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          repository: "main"
-
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
