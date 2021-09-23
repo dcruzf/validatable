@@ -31,4 +31,4 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
-          twine upload --verbose dist/*
+          twine upload -u $TWINE_USERNAME -p $TWINE_PASSWORD --non-interactive --verbose dist/*
