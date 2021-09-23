@@ -32,6 +32,14 @@ install:
 	@pip install -r tests/requirements-testing.txt
 	@pip install -e .
 
+.PHONY: install-pre-commit
+install-pre-commit:
+	@pip install pre-commit
+
+.PHONY: pre-commit
+pre-commit:
+	@pre-commit run -a
+
 .PHONY: clean
 clean:
 	rm -rf `find . -name __pycache__`
@@ -46,5 +54,4 @@ clean:
 	rm -f .coverage.*
 	rm -f validatable/*.c validatable/*.so
 	python setup.py clean
-	rm -rf codecov.sh
 	rm -rf coverage.xml
