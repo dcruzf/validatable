@@ -1,0 +1,6 @@
+include LICENSE
+include README.md
+graft tests
+global-exclude __pycache__
+global-exclude *.py[cod]
+recursive-include docs *.svg
