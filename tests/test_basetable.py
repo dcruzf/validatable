@@ -19,6 +19,7 @@ from ipaddress import (
 
 import pytest
 import sqlalchemy as sa
+from conftest import NUM_TEST, metadata
 from faker import Faker
 from pydantic import (
     UUID1,
@@ -46,26 +47,6 @@ from validatable.main import BaseTable
 
 Faker.seed(2)
 faker = Faker()
-
-
-NUM_TEST = int(os.getenv("N") or 1)
-DATABASE = os.getenv("DB") or "sqlite"
-metadata = sa.MetaData()
-
-
-@pytest.fixture(scope="session")
-def engine():
-
-    if DATABASE == "sqlite":
-        yield sa.create_engine("sqlite:///:memory:")
-    if DATABASE == "postgresql":
-        yield sa.create_engine(
-            "postgresql://validatable:password@localhost:5432/db"
-        )
-    if DATABASE == "mariadb":
-        yield sa.create_engine(
-            "mariadb://validatable:password@localhost:3306/db"
-        )
 
 
 @pytest.fixture(scope="function")
@@ -111,7 +92,7 @@ class ModelCaseNumber(Base):
     )
     python_decimal: Decimal = Field(
         default_factory=lambda: Decimal(
-            f"{random.uniform(-1000000000, 1000000000):.10f}"
+            f"{random.uniform(-1000000000, 1000000000):.10f}",
         )  # noqa E501
     )
     con_decimal: condecimal() = Field(  # type: ignore[valid-type]
@@ -202,7 +183,7 @@ class ModelCaseDateTime(Base):
     dt_time: dt.time = Field(default_factory=faker.time_object)
     dt_timedelta: dt.timedelta = Field(
         default_factory=lambda: dt.timedelta(
-            microseconds=random.randint(0, 999999999)
+            seconds=random.randint(0, 999999999)
         )
     )
 
