@@ -78,11 +78,7 @@ def test_json_type_parameterised_db():
 
     model = TableJsonWrapper(json_field=JsonCase().json())
 
-    engine = create_engine(
-        "sqlite:///:memory:",
-        json_deserializer=lambda x: x,
-        json_serializer=lambda obj: json.dumps(obj, default=pydantic_encoder),
-    )
+    engine = create_engine("sqlite:///:memory:")
 
     metadata.create_all(engine)
     with engine.connect() as conn:
