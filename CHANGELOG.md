@@ -3,6 +3,7 @@
 ## Added
 
 - Add CHANGELOG.md
+- Add json type support
 
 ## Fixed
 
