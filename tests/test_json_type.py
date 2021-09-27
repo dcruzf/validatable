@@ -1,11 +1,9 @@
-import json
 from datetime import datetime
 from uuid import uuid4
 
 import pytest
 import sqlalchemy as sa
 from pydantic import BaseModel, Json
-from pydantic.json import pydantic_encoder
 
 from validatable import UUID4, BaseTable, Field, MetaData, create_engine
 
@@ -33,6 +31,7 @@ def test_json_type():
         b'{"name":"John", "age":30, "car":null}',
         b'{"employees":["John", "Anna", "Peter"]}',
         b"[1, 2, 3]",
+        JsonCase().json(),
     ],
 )
 def test_json_type_db(valid_json):
@@ -44,11 +43,7 @@ def test_json_type_db(valid_json):
 
     model = TableJson(data=valid_json)
 
-    engine = create_engine(
-        "sqlite:///:memory:",
-        json_deserializer=lambda x: x,
-        json_serializer=lambda obj: json.dumps(obj, default=pydantic_encoder),
-    )
+    engine = create_engine("sqlite:///:memory:")
 
     metadata.create_all(engine)
     with engine.connect() as conn:
