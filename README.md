@@ -1,5 +1,5 @@
 <p align="center">
-<img  width="150" height="150" src="./docs/img/logo.svg">
+<img  width="150" height="150" src="https://raw.githubusercontent.com/dcruzf/validatable/main/docs/img/logo.svg">
 </p>
 
 <h1 align="center">Validatable</h1>
