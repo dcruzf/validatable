@@ -59,8 +59,9 @@ from pydantic.types import (
     conset,
     constr,
 )
-from sqlalchemy import ForeignKey, MetaData, create_engine
+from sqlalchemy import ForeignKey, MetaData
 
+from .engine import create_engine
 from .fields import Field
 from .main import BaseTable
 from .version import VERSION
