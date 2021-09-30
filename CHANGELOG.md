@@ -1,4 +1,4 @@
-# Unreleased
+# v0.2.0 (2021-09-30)
 
 ## Added
 
@@ -9,6 +9,6 @@
 
 - Fix log image in README.md
 
-# v0.1.0-alpha (2021-09-23)
+# v0.1.0 (2021-09-23)
 
 - First Release
