@@ -2,15 +2,18 @@
 <img  width="150" height="150" src="https://raw.githubusercontent.com/dcruzf/validatable/main/docs/img/logo.svg">
 </p>
 
-<h1 align="center">Validatable</h1>
+<h1 align="center">Validatable <br> <span style="font-size: 16px; color:green; font-style: italic;">Data validation and SQL Toolkit using Python type hint.</span></h1>
 
 [![pre-commit](https://github.com/dcruzf/validatable/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/pre-commit.yml)
 [![test on Linux](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_linux.yml)
 [![test on MacOS](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml/badge.svg)](https://github.com/dcruzf/validatable/actions/workflows/test_mac.yml)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/validatable)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/dcruzf/validatable.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dcruzf/validatable/context:python)
+![PyPI - License](https://img.shields.io/pypi/l/validatable)
 
 ## Introduction
 
-Validatable provides a single class definition for data validation and persistence in relational databases. It uses Pydantic and SQLAlchemy Core.
+Validatable provides a single class definition for data validation and SQL table representation. It uses Pydantic and SQLAlchemy Core.
 
 ## Getting Started
 

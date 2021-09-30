@@ -1,18 +1,32 @@
+"""
+The main module provides the definition of Validatable BaseTable.
+
+It defines ValidatableMetaclass, which is a customization of BaseTable
+creation that includes the instantiation of a SQLAlchemy Table object.
+
+BaseTable class extends Pydantic BaseModel to include SQLAlchemy Table
+instance methods in the class interface.
+
+"""
 from typing import Any, Dict, List, Optional, Set
 
 from pydantic import BaseModel
 from pydantic.main import ModelMetaclass
 from sqlalchemy import Table
 from sqlalchemy.sql.base import ImmutableColumnCollection
+from sqlalchemy.sql.dml import Delete, Insert, Update
 from sqlalchemy.sql.schema import MetaData
+from sqlalchemy.sql.selectable import Join, Select
 
 from .inference import get_table
 
 
 class ValidatableMetaclass(ModelMetaclass):
+    """Extends ModelMetaclass to include SQLAlchemy Table logic."""
+
     @classmethod
     def __prepare__(mcls, name, bases, *, metadata=None, **kwargs):
-
+        """Set metadata before the evaluation of the class body."""
         if isinstance(metadata, MetaData):
             return {"__sa_metadata__": metadata}
 
@@ -27,7 +41,7 @@ class ValidatableMetaclass(ModelMetaclass):
             raise TypeError("metadata must be a sqlalquemy metadata")
 
     def __new__(mcls, name, bases, namespace, metadata=None, **kwargs):
-
+        """Control the BaseTable definition."""
         table = namespace.get("__sa_table__")
         if isinstance(table, Table):
             return super().__new__(mcls, name, bases, namespace, **kwargs)
@@ -62,14 +76,18 @@ class ValidatableMetaclass(ModelMetaclass):
 
     @property
     def c(cls) -> ImmutableColumnCollection:
+        """Return the collection of columns."""
         return cls.__sa_table__.c  # type: ignore[attr-defined]
 
     @property
     def metadata(cls) -> MetaData:
+        """Return the metadata instance."""
         return cls.__sa_metadata__  # type: ignore[attr-defined]
 
 
 class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
+    """Extends BaseModel to include SQLAlchemy Table methods."""
+
     __sa_table__: Table
     __sa_metadata__: MetaData
     __sa_table_args__: List[Any]
@@ -78,47 +96,67 @@ class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
 
     @property
     def c(cls) -> ImmutableColumnCollection:
+        """Return the collection of columns."""
         return cls.__sa_table__.c
 
     @classmethod
-    def insert(cls, values=None, inline=False, **kwargs):
+    def insert(cls, values=None, inline=False, **kwargs) -> Insert:
         """
-        table.insert()
+        Generate an Insert object for current BaseTable.
 
+        E.g.::
+
+            stmt = User.insert().values(name='John')
         """
         return cls.__sa_table__.insert(values=values, inline=inline, **kwargs)
 
     @classmethod
-    def update(cls, whereclause=None, values=None, inline=False, **kwargs):
+    def update(
+        cls, whereclause=None, values=None, inline=False, **kwargs
+    ) -> Update:
         """
-        table.update()
+        Generate an Update object for current BaseTable.
 
+        E.g.::
+
+            stmt = User.update().where(User.c.id==1).values(name='John Doe')
         """
         return cls.__sa_table__.update(
             whereclause=whereclause, values=values, inline=inline, **kwargs
         )
 
     @classmethod
-    def delete(cls, whereclause=None, **kwargs):
+    def delete(cls, whereclause=None, **kwargs) -> Delete:
         """
-        table.delete()
+        Generate a Delete object for current BaseTable.
 
+        E.g.::
+
+            stmt = User.delete().where(User.c.id==1)
         """
         return cls.__sa_table__.delete(whereclause=whereclause, **kwargs)
 
     @classmethod
-    def select(cls, whereclause=None, **kwargs):
+    def select(cls, whereclause=None, **kwargs) -> Select:
         """
-        table.select()
+        Generate a Select object for current BaseTable.
 
+        E.g.::
+
+            stmt = User.select().where(User.c.id == 1)
         """
         return cls.__sa_table__.select(whereclause=whereclause, **kwargs)
 
     @classmethod
-    def join(cls, right, onclause=None, isouter=False, full=False):
+    def join(cls, right, onclause=None, isouter=False, full=False) -> Join:
         """
-        table.join()
+        Return a `Join` between two tables.
 
+        E.g.::
+
+            j = User.join(Address,
+                          User.c.id == Address.c.user_id)
+            stmt = select(user_table).select_from(j)
         """
         if hasattr(right, "__sa_table__"):
             right = right.__sa_table__

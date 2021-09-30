@@ -16,8 +16,8 @@ version = SourceFileLoader("version", "validatable/version.py").load_module()
 setup(
     name="validatable",
     version=version.VERSION,
-    description="Validatable provides a single class definition "
-    "for SqlAlchemy Table and Pydantic BaseModel",
+    description="Validatable provides a single class definition for data"
+    " validation and SQL table representation",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Daniel França",
@@ -26,7 +26,7 @@ setup(
     packages=["validatable"],
     license="MIT",
     python_requires=">=3.6.1",
-    install_requires=["pydantic", "sqlalchemy"],
+    install_requires=["pydantic>=1.8", "sqlalchemy>=1.3"],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python",

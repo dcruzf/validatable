@@ -11,7 +11,13 @@ import sqlalchemy as sa
 from pydantic import EmailStr, NameEmail
 from pydantic.fields import ModelField
 from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
-from pydantic.types import ConstrainedBytes, ConstrainedDecimal, ConstrainedStr
+from pydantic.types import (
+    ConstrainedBytes,
+    ConstrainedDecimal,
+    ConstrainedStr,
+    Json,
+    JsonWrapper,
+)
 
 from .generic_types import GUID, AutoString
 
@@ -109,30 +115,33 @@ def from_datetimes_to_sqlalchemy_type(python_type: type, m: ModelField):
 
 def get_type(m: ModelField):
 
-    if issubclass(m.type_, numbers.Number):
-        return from_number_to_sqlalchemy_type(m.type_, m)
+    type_ = m.outer_type_
 
-    if issubclass(m.type_, (str, NameEmail, pathlib.Path)):
-        return from_str_to_sqlalchemy_type(m.type_, m)
-
-    if issubclass(m.type_, uuid.UUID):
+    if issubclass(type_, uuid.UUID):
         return GUID
 
-    if issubclass(m.type_, (dt.date, dt.time, dt.timedelta)):
-        return from_datetimes_to_sqlalchemy_type(m.type_, m)
+    if issubclass(type_, (Json, JsonWrapper)):
+        return sa.JSON
 
-    if issubclass(m.type_, bytes):
-        return from_bytes_to_sqlalchemy_type(m.type_, m)
+    if issubclass(type_, (str, NameEmail, pathlib.Path)):
+        return from_str_to_sqlalchemy_type(type_, m)
 
-    if issubclass(m.type_, enum.Enum):
-        return sa.Enum(m.type_)
+    if issubclass(type_, numbers.Number):
+        return from_number_to_sqlalchemy_type(type_, m)
 
-    if issubclass(m.type_, ipaddress._IPAddressBase):
-        return from_ipaddress_to_sqlalchemy_type(m.type_, m)
+    if issubclass(type_, (dt.date, dt.time, dt.timedelta)):
+        return from_datetimes_to_sqlalchemy_type(type_, m)
 
-    raise TypeError(
-        "cannot infer sqlalchemy type for {}".format(repr(m.type_))
-    )
+    if issubclass(type_, bytes):
+        return from_bytes_to_sqlalchemy_type(type_, m)
+
+    if issubclass(type_, enum.Enum):
+        return sa.Enum(type_)
+
+    if issubclass(type_, ipaddress._IPAddressBase):
+        return from_ipaddress_to_sqlalchemy_type(type_, m)
+
+    raise TypeError("cannot infer sqlalchemy type for {}".format(repr(type_)))
 
 
 def get_sa_args_kwargs(m: ModelField) -> Tuple[Any, Dict[str, Any]]:
