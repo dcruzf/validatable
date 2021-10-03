@@ -26,7 +26,8 @@ setup(
     packages=["validatable"],
     license="MIT",
     python_requires=">=3.6.1",
-    install_requires=["pydantic>=1.8", "sqlalchemy>=1.3"],
+    install_requires=["pydantic>=1.8", "sqlalchemy>=1.3", "sqlalchemy2-stubs"],
+    extras_require={"email": ["email-validator>=1.0.3"]},
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python",
