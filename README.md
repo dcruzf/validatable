@@ -34,10 +34,10 @@ from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import ForeignKey, MetaData
+from sqlalchemy.dialects.postgresql import dialect
 from sqlalchemy.schema import CreateTable
 
-from validatable import UUID4, BaseTable, EmailStr, Field
+from validatable import UUID4, BaseTable, EmailStr, Field, ForeignKey, MetaData
 
 
 class Base(BaseTable):
@@ -49,18 +49,18 @@ class User(Base):
     name: str
     email: EmailStr
     created_ts: datetime = Field(default_factory=datetime.now)
-    friends: Optional[int] = Field(None, sa_fk=ForeignKey("user.id"))
+    friends: Optional[UUID4] = Field(sa_fk=ForeignKey("user.id"))
 
 
-ddl = CreateTable(User.__sa_table__)
+ddl = CreateTable(User.__sa_table__).compile(dialect=dialect())
 print(ddl)
 
 # CREATE TABLE "user" (
-#         id BINARY(16) NOT NULL,
-#         name VARCHAR,
-#         email VARCHAR(320),
-#         created_ts DATETIME NOT NULL,
-#         friends INTEGER NOT NULL,
+#         id UUID NOT NULL,
+#         name VARCHAR NOT NULL,
+#         email VARCHAR(320) NOT NULL,
+#         created_ts TIMESTAMP WITHOUT TIME ZONE,
+#         friends UUID,
 #         PRIMARY KEY (id),
 #         FOREIGN KEY(friends) REFERENCES "user" (id)
 # )

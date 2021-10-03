@@ -5,11 +5,11 @@ import ipaddress
 import numbers
 import pathlib
 import uuid
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import sqlalchemy as sa
 from pydantic import EmailStr, NameEmail
-from pydantic.fields import ModelField
+from pydantic.fields import ModelField, UndefinedType
 from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
 from pydantic.types import (
     ConstrainedBytes,
@@ -144,13 +144,30 @@ def get_type(m: ModelField):
     raise TypeError("cannot infer sqlalchemy type for {}".format(repr(type_)))
 
 
+def primary_key_kwargs(col_kwargs: Dict[str, Any]):
+    pk = col_kwargs.pop("pk", False)
+    return col_kwargs.get("primary_key") or pk
+
+
+def nullable_kwargs(
+    col_kwargs: Dict[str, Any], required: Union[bool, UndefinedType], pk: bool
+):
+    nullable = col_kwargs.get("nullable")
+    if pk:
+        return nullable
+    return nullable if nullable is not None else not required
+
+
 def get_sa_args_kwargs(m: ModelField) -> Tuple[Any, Dict[str, Any]]:
     keys = tuple(m.field_info.extra.keys())
     col_kwargs = {
         k[3:]: m.field_info.extra.pop(k) for k in keys if k.startswith("sa_")
     }
-    pk = col_kwargs.pop("pk", False)
-    col_kwargs["primary_key"] = col_kwargs.get("primary_key") or pk
+    col_kwargs["primary_key"] = primary_key_kwargs(col_kwargs)
+    col_kwargs["nullable"] = nullable_kwargs(
+        col_kwargs, m.required, col_kwargs["primary_key"]
+    )
+
     args = col_kwargs.pop("args", [])
     fk = col_kwargs.pop("fk", None)
     fk = col_kwargs.pop("foreign_key", None) or fk
