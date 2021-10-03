@@ -63,8 +63,8 @@ jobs:
           name: coverage
           path: coverage
 
-      - run: pip install coverage
-      - run: ls -la
+      - run: pip install coverage[toml]
+      - run: ls -la coverage/
       - run: coverage combine coverage
       - run: coverage report
       - run: coverage html -d cov
