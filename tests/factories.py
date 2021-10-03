@@ -279,12 +279,26 @@ class CaseEnum(enum.Enum):
     a: str = "a1"
     b: str = "b2"
     c: str = "c3"
+    d: str = "d4"
+    e: str = "e5"
+    f: str = "f6"
+    g: str = "g7"
+    h: str = "h8"
+    i: str = "i9"
+    j: str = "j0"
 
 
 class CaseIntEnum(enum.IntEnum):
-    a: int = 1
-    b: int = 2
-    c: int = 3
+    a: int = enum.auto()
+    b: int = enum.auto()
+    c: int = enum.auto()
+    d: int = enum.auto()
+    e: int = enum.auto()
+    f: int = enum.auto()
+    g: int = enum.auto()
+    h: int = enum.auto()
+    i: int = enum.auto()
+    j: int = enum.auto()
 
 
 class ModelEnum(BaseTable, metadata=MetaData()):
