@@ -6,7 +6,7 @@ help:
 
 .PHONY: test
 test:
-	@PYTHONPATH=.:./validatable coverage run -m py.test
+	@py.test --cov=validatable
 
 .PHONY: cov
 cov:
