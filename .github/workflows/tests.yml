@@ -40,6 +40,8 @@ jobs:
       - name: test
         env:
           COVERAGE_FILE: coverage/.coverage.${{ matrix.os }}-py${{ matrix.python-version }}
+          COV_CONTEXT: ${{ matrix.os }}-py${{ matrix.python-version }}
+
         run: |
           make test
 
@@ -64,12 +66,19 @@ jobs:
           name: coverage
           path: coverage
 
-      - run: pip install coverage[toml]
-      - run: ls -la coverage/
-      - run: coverage combine coverage
-      - run: coverage html -i -d cov
-      - run: coverage json -i -o cov/coverage.json
-      - run: coverage xml -i
+      - name: coverage combine
+        run: |
+          pip install coverage[toml]
+          coverage combine coverage
+
+      - name: coverage reports
+        run: |
+          coverage html --show-context -i -d cov
+          coverage json -i --contexts='ubuntu' -o cov/cov-ubuntu.json
+          coverage json -i --contexts='macos' -o cov/cov-macos.json
+          coverage json -i -o cov/coverage.json
+          coverage xml -i
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
 

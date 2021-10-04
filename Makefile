@@ -6,7 +6,7 @@ help:
 
 .PHONY: test
 test:
-	@py.test --cov=validatable
+	@coverage run --context=${COV_CONTEXT} -m pytest
 
 .PHONY: cov
 cov:
