@@ -69,6 +69,9 @@ jobs:
       - run: coverage report
       - run: coverage html -d cov
       - run: coverage json -o cov/coverage.json
+      - run: coverage xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
 
       - name: gh-pages
         uses: peaceiris/actions-gh-pages@v3
