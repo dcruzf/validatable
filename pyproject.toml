@@ -10,9 +10,16 @@ include = '\.pyi?$'
 
 [tool.coverage.run]
 branch = true
+relative_files = false
 source = ["validatable"]
 omit = []
 dynamic_context = "test_function"
+
+[tool.coverage.paths]
+source = [
+    "validatable/",
+    "/Users/runner/work/validatable/validatable/validatable/",
+]
 
 [tool.isort]
 profile = "black"
