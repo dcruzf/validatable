@@ -15,11 +15,11 @@ on:
 jobs:
   tests:
     name: test py${{ matrix.python-version }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu, macos]
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10.0-rc.2"]
     env:
       PYTHON: ${{ matrix.python-version }}
@@ -55,7 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - uses: actions/setup-python@v2
         with:
           python-version: "3.9"
@@ -73,11 +72,11 @@ jobs:
 
       - name: coverage reports
         run: |
-          coverage html --show-context -i -d cov
-          coverage json -i --contexts='ubuntu' -o cov/cov-ubuntu.json
-          coverage json -i --contexts='macos' -o cov/cov-macos.json
-          coverage json -i -o cov/coverage.json
-          coverage xml -i
+          coverage html --show-context -d cov
+          coverage json --contexts='ubuntu' -o cov/cov-ubuntu.json
+          coverage json --contexts='macos' -o cov/cov-macos.json
+          coverage json -o cov/coverage.json
+          coverage xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
