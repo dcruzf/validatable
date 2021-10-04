@@ -12,6 +12,7 @@ include = '\.pyi?$'
 branch = true
 source = ["validatable"]
 omit = []
+dynamic_context = "test_function"
 
 [tool.isort]
 profile = "black"
