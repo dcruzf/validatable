@@ -1,0 +1,89 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - "validatable/**"
+      - "tests/**"
+      - ".github/workflows/tests.yml"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: test py${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10.0-rc.2"]
+    env:
+      PYTHON: ${{ matrix.python-version }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install
+        run: |
+          make install
+          pip freeze
+
+      - name: test
+        env:
+          COVERAGE_FILE: coverage/.coverage.${{ matrix.os }}-py${{ matrix.python-version }}
+          COV_CONTEXT: ${{ matrix.os }}-py${{ matrix.python-version }}
+
+        run: |
+          make test
+
+      - name: coverage files
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: coverage
+  coverage:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: download coverage files
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage
+          path: coverage
+
+      - name: coverage combine
+        run: |
+          pip install coverage[toml]
+          coverage combine coverage
+
+      - name: coverage reports
+        run: |
+          coverage html --show-context -d cov
+          coverage json --contexts='ubuntu' -o cov/cov-ubuntu.json
+          coverage json --contexts='macos' -o cov/cov-macos.json
+          coverage json -o cov/coverage.json
+          coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+
+      - name: gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./cov
+          destination_dir: cov
