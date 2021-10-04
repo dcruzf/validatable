@@ -7,7 +7,7 @@ on:
     paths:
       - "validatable/**"
       - "tests/**"
-      - ".github/workflows/test_linux.yml"
+      - ".github/workflows/tests.yml"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -15,10 +15,11 @@ on:
 jobs:
   test-linux:
     name: test py${{ matrix.python-version }} on linux
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10.0-rc.2"]
     env:
       PYTHON: ${{ matrix.python-version }}
@@ -38,7 +39,8 @@ jobs:
 
       - name: test
         env:
-          COVERAGE_FILE: coverage/.coverage.linux-py${{ matrix.python-version }}
+          COVERAGE_FILE: coverage/.coverage.${{ matrix.os }}-py${{ matrix.python-version }}
+          CONTEXT: ${{ matrix.os }}-py${{ matrix.python-version }}
         run: |
           make test
 
@@ -67,9 +69,9 @@ jobs:
       - run: ls -la coverage/
       - run: coverage combine coverage
       - run: coverage report
-      - run: coverage html -d cov
-      - run: coverage json -o cov/coverage.json
-      - run: coverage xml
+      - run: coverage html --show-contexts -d cov
+      - run: coverage json --show-contexts -o cov/coverage.json
+      - run: coverage xml --show-contexts
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
 
