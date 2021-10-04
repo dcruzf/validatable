@@ -1,4 +1,4 @@
-name: test on Linux
+name: CI
 on:
   pull_request:
     branches:
@@ -13,8 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-linux:
-    name: test py${{ matrix.python-version }} on linux
+  tests:
+    name: test py${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -68,7 +68,6 @@ jobs:
       - run: pip install coverage[toml]
       - run: ls -la coverage/
       - run: coverage combine coverage
-      - run: coverage report
       - run: coverage html --show-contexts -d cov
       - run: coverage json --show-contexts -o cov/coverage.json
       - run: coverage xml --show-contexts
