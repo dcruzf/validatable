@@ -10,7 +10,6 @@ include = '\.pyi?$'
 
 [tool.coverage.run]
 branch = true
-relative_files = false
 source = ["validatable"]
 omit = []
 dynamic_context = "test_function"
