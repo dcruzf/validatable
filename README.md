@@ -11,7 +11,8 @@ _Data validation and SQL Toolkit using Python type hints._
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/validatable)](https://pypi.org/project/validatable/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/dcruzf/validatable.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/dcruzf/validatable/context:python)
 [![PyPI - License](https://img.shields.io/pypi/l/validatable)](https://raw.githubusercontent.com/dcruzf/validatable/main/LICENSE)
-[![coverage.py report](https://img.shields.io/badge/dynamic/json?color=success&labelColor=success&label=coverage&logo=github&query=%24.totals.percent_covered_display&suffix=%25&url=https%3A%2F%2Fdcruzf.github.io%2Fvalidatable%2Fcov%2Fcoverage.json)](https://dcruzf.github.io/validatable/cov/)
+[![codecov](https://codecov.io/gh/dcruzf/validatable/branch/main/graph/badge.svg?token=ZLNIQPL1UC)](https://codecov.io/gh/dcruzf/validatable)
+[![coverage.py report](https://img.shields.io/badge/dynamic/json?color=success&labelColor=gray&label=coverage-html&logo=github&query=%24.totals.percent_covered_display&suffix=%25&url=https%3A%2F%2Fdcruzf.github.io%2Fvalidatable%2Fcov%2Fcoverage.json)](https://dcruzf.github.io/validatable/cov/)
 
 ## Introduction
 
