@@ -1,25 +1,7 @@
-import datetime as dt
-import decimal
-import enum
-import ipaddress
-import numbers
-import pathlib
-import uuid
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
 import sqlalchemy as sa
-from pydantic import EmailStr, NameEmail
 from pydantic.fields import ModelField, UndefinedType
-from pydantic.networks import IPvAnyAddress, IPvAnyInterface, IPvAnyNetwork
-from pydantic.types import (
-    ConstrainedBytes,
-    ConstrainedDecimal,
-    ConstrainedStr,
-    Json,
-    JsonWrapper,
-)
-
-from .generic_types import GUID, AutoString
+from .type_dispatch import get_sql_type
 
 
 def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
@@ -33,115 +15,6 @@ def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
     raise ValueError(
         "Column name must be equal to field name, or field alias, or None"
     )
-
-
-def from_str_to_sqlalchemy_type(python_type: type, m: ModelField):
-    if m.field_info.max_length:
-        return sa.String(m.field_info.max_length)
-    if issubclass(python_type, ConstrainedStr):
-        length = python_type.max_length or python_type.curtail_length
-        return sa.String(length)
-
-    if issubclass(python_type, EmailStr):
-        return sa.String(320)
-
-    return AutoString
-
-
-def from_bytes_to_sqlalchemy_type(python_type: type, m: ModelField):
-    if m.field_info.max_length:
-        return sa.LargeBinary(m.field_info.max_length)
-    if issubclass(python_type, ConstrainedBytes):
-        return sa.LargeBinary(python_type.max_length)
-
-    return sa.LargeBinary
-
-
-def from_number_to_sqlalchemy_type(python_type: type, m: ModelField):
-
-    if issubclass(python_type, int):
-        return sa.Integer
-
-    if issubclass(python_type, float):
-        return sa.Float
-
-    if issubclass(python_type, ConstrainedDecimal):
-        return sa.Numeric(
-            precision=python_type.max_digits, scale=python_type.decimal_places
-        )
-
-    if issubclass(python_type, decimal.Decimal):
-        return sa.Numeric
-
-    raise TypeError(
-        "cannot infer sqlalchemy type for {}".format(repr(python_type))
-    )
-
-
-def from_ipaddress_to_sqlalchemy_type(python_type: type, m: ModelField):
-
-    if issubclass(python_type, ipaddress._BaseV4):  # type: ignore
-        return AutoString
-
-    if issubclass(
-        python_type,
-        (
-            ipaddress._BaseV6,  # type: ignore
-            IPvAnyAddress,
-            IPvAnyNetwork,
-            IPvAnyInterface,
-        ),
-    ):
-        return AutoString
-
-    raise TypeError(
-        "cannot infer sqlalchemy type for {}".format(repr(python_type))
-    )
-
-
-def from_datetimes_to_sqlalchemy_type(python_type: type, m: ModelField):
-
-    if issubclass(python_type, dt.datetime):
-        return sa.DateTime
-
-    if issubclass(python_type, dt.date):
-        return sa.Date
-
-    if issubclass(python_type, dt.time):
-        return sa.Time
-
-    return sa.Interval
-
-
-def get_type(m: ModelField):
-
-    type_ = m.outer_type_
-
-    if issubclass(type_, uuid.UUID):
-        return GUID
-
-    if issubclass(type_, (Json, JsonWrapper)):
-        return sa.JSON
-
-    if issubclass(type_, (str, NameEmail, pathlib.Path)):
-        return from_str_to_sqlalchemy_type(type_, m)
-
-    if issubclass(type_, numbers.Number):
-        return from_number_to_sqlalchemy_type(type_, m)
-
-    if issubclass(type_, (dt.date, dt.time, dt.timedelta)):
-        return from_datetimes_to_sqlalchemy_type(type_, m)
-
-    if issubclass(type_, bytes):
-        return from_bytes_to_sqlalchemy_type(type_, m)
-
-    if issubclass(type_, enum.Enum):
-        return sa.Enum(type_)
-
-    if issubclass(type_, ipaddress._IPAddressBase):
-        return from_ipaddress_to_sqlalchemy_type(type_, m)
-
-    raise TypeError("cannot infer sqlalchemy type for {}".format(repr(type_)))
 
 
 def primary_key_kwargs(col_kwargs: Dict[str, Any]):
@@ -187,7 +60,7 @@ def get_column(m: ModelField) -> sa.Column:
     if column_type:
         return sa.Column(m.alias, column_type, *args, **col_kwargs)
 
-    sa_type = get_type(m)
+    sa_type = get_sql_type(m)
     return sa.Column(m.alias, sa_type, *args, **col_kwargs)
 
 

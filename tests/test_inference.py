@@ -111,7 +111,7 @@ def test_get_column_python_int():
     """
     field = ModelCase.__fields__.get("python_int")
     col = get_column(field)
-    assert col.type.__class__ == sa.Integer
+    assert col.type.__class__ == sa.BigInteger
 
 
 def test_get_column_con_int():
@@ -121,7 +121,7 @@ def test_get_column_con_int():
     """
     con_int = ModelCase.__fields__.get("con_int")
     col = get_column(con_int)
-    assert col.type.__class__ == sa.Integer
+    assert col.type.__class__ == sa.BigInteger
 
 
 def test_get_column_python_float():
