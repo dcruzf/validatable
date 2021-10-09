@@ -1,5 +1,4 @@
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
 import sqlalchemy as sa
 from pydantic.fields import ModelField, UndefinedType
 
