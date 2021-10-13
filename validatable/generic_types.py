@@ -19,30 +19,6 @@ class SLBigInteger(sa.types.TypeDecorator):
             return dialect.type_descriptor(sa.BigInteger)
 
 
-class SLBigInteger(sa.types.TypeDecorator):
-
-    cache_ok = True
-    impl = sa.BigInteger
-
-    def load_dialect_impl(self, dialect):
-        if dialect.name == "sqlite":
-            return dialect.type_descriptor(sa.dialects.sqlite.INTEGER)
-        else:
-            return dialect.type_descriptor(sa.BigInteger)
-
-
-class SLBigInteger(sa.types.TypeDecorator):
-
-    cache_ok = True
-    impl = sa.BigInteger
-
-    def load_dialect_impl(self, dialect):
-        if dialect.name == "sqlite":
-            return dialect.type_descriptor(sa.dialects.sqlite.INTEGER)
-        else:
-            return dialect.type_descriptor(sa.BigInteger)
-
-
 class GUID(sa.types.TypeDecorator):
     """Platform-independent GUID type.
     Uses PostgreSQL's UUID type, otherwise uses
