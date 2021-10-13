@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy.dialects import mysql, postgresql, sqlite
 from sqlalchemy.schema import Column, CreateColumn
 
-from validatable.generic_types import GUID, AutoString
+from validatable.generic_types import GUID, AutoString, SLBigInteger
 
 
 def test_guid_type_DDL_postgresql():
@@ -194,3 +194,28 @@ def test_autostring_process_result_value(value, dialect, expected):
     auto_string = AutoString()
     result = auto_string.process_result_value(value, DialectMock)
     assert result == expected
+
+
+def test_slbiginteger_type_DDL_sqlite():
+    c = Column("c", SLBigInteger)
+    t_ddl = CreateColumn(c)
+
+    sqlite_ddl = str(t_ddl.compile(dialect=sqlite.dialect()))
+    _, sqlite_type = sqlite_ddl.split()
+
+    assert "INTEGER" == sqlite_type
+
+
+@pytest.mark.parametrize(
+    "dialect, expected_type",
+    [(sqlite, "INTEGER"), (mysql, "BIGINT"), (postgresql, "BIGINT")],
+    ids=["sqlite", "mysql", "postgresql"],
+)
+def test_slbiginteger_type_DDL_not_sqlite(dialect, expected_type):
+    c = Column("c", SLBigInteger)
+    t_ddl = CreateColumn(c)
+
+    dialect_ddl = str(t_ddl.compile(dialect=dialect.dialect()))
+    _, dialect_type = dialect_ddl.split()
+
+    assert dialect_type == expected_type

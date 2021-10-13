@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Daniel França",
-    author_email="daniel@ci.ufpb.br",
+    author_email="dcruzf.py@gmail.com",
     url="https://github.com/dcruzf/validatable",
     packages=["validatable"],
     license="MIT",
@@ -29,7 +29,7 @@ setup(
     install_requires=["pydantic>=1.8", "sqlalchemy>=1.3", "sqlalchemy2-stubs"],
     extras_require={"email": ["email-validator>=1.0.3"]},
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
