@@ -22,6 +22,7 @@ from pydantic import (
     UUID4,
     UUID5,
     AnyHttpUrl,
+    AnyUrl,
     BaseModel,
     EmailStr,
     Field,
@@ -36,6 +37,7 @@ from pydantic import (
     confloat,
     conint,
     constr,
+    stricturl,
 )
 
 from validatable.generic_types import GUID, AutoString, SLBigInteger
@@ -92,6 +94,8 @@ class ModelCase(BaseModel):
     ipvanyn: IPvAnyNetwork
     http_url: HttpUrl
     any_http_url: AnyHttpUrl
+    any_url: AnyUrl
+    strict_url: stricturl()  # type: ignore[valid-type]
     dt_datetime: dt.datetime
     dt_date: dt.date
     dt_time: dt.time
@@ -393,8 +397,10 @@ def test_get_column_uuid(field: str):
     assert col.type.python_type == uuid.UUID
 
 
-@pytest.mark.parametrize("field", ("http_url", "any_http_url"))
-def test_get_column_http_url(field: str):
+@pytest.mark.parametrize(
+    "field", ("http_url", "any_http_url", "strict_url", "any_url")
+)
+def test_get_column_urls(field: str):
     m = ModelCase.__fields__.get(field)
     col = get_column(m)  # type: ignore
     assert col.type.__class__ == AutoString

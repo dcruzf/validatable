@@ -203,7 +203,7 @@ def _(m: ModelField, *args, **kwargs):
     IPvAnyInterface, ipaddress.IPv4Interface, ipaddress.IPv6Interface
 )
 def _(m: ModelField, *args, **kwargs):
-    return AutoString(length=43, deserializer=ipaddress.ip_network)
+    return AutoString(length=43, deserializer=ipaddress.ip_interface)
 
 
 @get_sql_type.register(HttpUrl)  # type: ignore[no-redef]
@@ -213,6 +213,7 @@ def _(m: ModelField, *args, **kwargs):
 
 @get_sql_type.register(AnyUrl, AnyHttpUrl)  # type: ignore[no-redef]
 def _(m: ModelField, *args, **kwargs):
+
     return AutoString(length=AnyUrl.max_length)
 
 
