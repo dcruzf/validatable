@@ -1,6 +1,11 @@
+from typing import Type
+
 import pytest
 from conftest import NUM_REPETITIONS
 from factories import (
+    ModelAnyHttpUrl,
+    ModelAnyUrl,
+    ModelBool,
     ModelBytes,
     ModelConBytes,
     ModelConDecimal,
@@ -13,6 +18,7 @@ from factories import (
     ModelEmailStr,
     ModelEnum,
     ModelFloat,
+    ModelHttpUrl,
     ModelInt,
     ModelIntEnum,
     ModelIPv4Address,
@@ -31,6 +37,8 @@ from factories import (
     ModelPositiveFloat,
     ModelPositiveInt,
     ModelStr,
+    ModelStrictBool,
+    ModelStrictUrl,
     ModelTime,
     ModelTimedelta,
     ModelUUID1,
@@ -38,6 +46,8 @@ from factories import (
     ModelUUID4,
     ModelUUID5,
 )
+
+from validatable import BaseTable
 
 
 def make_params(*Models, repeat: int = NUM_REPETITIONS):
@@ -86,6 +96,12 @@ ids, params = make_params(
     ModelTimedelta,
     ModelEnum,
     ModelIntEnum,
+    ModelHttpUrl,
+    ModelAnyUrl,
+    ModelAnyHttpUrl,
+    ModelStrictUrl,
+    ModelBool,
+    ModelStrictBool,
 )
 
 
@@ -103,7 +119,7 @@ def test_factories(Model, instance):
     r"support Decimal objects natively"
 )
 @pytest.mark.parametrize("Model, instance", params, ids=ids)
-def test_type_(Model, instance, make_conn):
+def test_type_(Model: Type[BaseTable], instance: BaseTable, make_conn):
     create = Model.insert().values(instance.dict())
     read = Model.select().where(
         Model.c.test == instance.test  # type: ignore[attr-defined]
@@ -113,5 +129,5 @@ def test_type_(Model, instance, make_conn):
     result = conn.execute(read)
     data = result.fetchone()
 
-    m = Model.parse_obj(data)
+    m = Model.construct(**data)
     assert m == instance

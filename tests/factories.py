@@ -23,8 +23,11 @@ from pydantic import (
     UUID3,
     UUID4,
     UUID5,
+    AnyHttpUrl,
+    AnyUrl,
     EmailStr,
     Field,
+    HttpUrl,
     IPvAnyAddress,
     IPvAnyInterface,
     IPvAnyNetwork,
@@ -33,11 +36,13 @@ from pydantic import (
     NegativeInt,
     PositiveFloat,
     PositiveInt,
+    StrictBool,
     conbytes,
     condecimal,
     confloat,
     conint,
     constr,
+    stricturl,
 )
 
 from validatable.main import BaseTable, MetaData
@@ -249,6 +254,24 @@ class ModelIPvAnyNetwork(BaseTable, metadata=MetaData()):
     )
 
 
+class ModelHttpUrl(BaseTable, metadata=MetaData()):
+    test: HttpUrl = Field(default_factory=faker.url)
+
+
+class ModelAnyUrl(BaseTable, metadata=MetaData()):
+    test: AnyUrl = Field(default_factory=faker.url)
+
+
+class ModelAnyHttpUrl(BaseTable, metadata=MetaData()):
+    test: AnyHttpUrl = Field(default_factory=faker.url)
+
+
+class ModelStrictUrl(BaseTable, metadata=MetaData()):
+    test: stricturl() = Field(  # type: ignore[valid-type]
+        default_factory=faker.url
+    )
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ datetime
 
 
@@ -314,4 +337,17 @@ class ModelIntEnum(BaseTable, metadata=MetaData()):
         default_factory=lambda: getattr(
             CaseIntEnum, random.choice(list(CaseIntEnum.__members__.keys()))
         )
+    )
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Boolean
+
+
+class ModelBool(BaseTable, metadata=MetaData()):
+    test: bool = Field(default_factory=lambda: random.choice((True, False)))
+
+
+class ModelStrictBool(BaseTable, metadata=MetaData()):
+    test: StrictBool = Field(
+        default_factory=lambda: random.choice((True, False))
     )

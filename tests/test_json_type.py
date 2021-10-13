@@ -33,6 +33,7 @@ def test_json_type():
         b"[1, 2, 3]",
         JsonCase().json(),
     ],
+    ids=[0, 1, 2, 3],
 )
 def test_json_type_db(valid_json):
     metadata = MetaData()
