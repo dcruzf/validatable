@@ -35,7 +35,7 @@ from pydantic import (
     constr,
 )
 
-from validatable.generic_types import GUID, AutoString
+from validatable.generic_types import GUID, AutoString, SLBigInteger
 from validatable.inference import get_column
 
 
@@ -111,7 +111,7 @@ def test_get_column_python_int():
     """
     field = ModelCase.__fields__.get("python_int")
     col = get_column(field)
-    assert col.type.__class__ == sa.BigInteger
+    assert col.type.__class__ == SLBigInteger
 
 
 def test_get_column_con_int():
