@@ -124,8 +124,6 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
 
 @get_sql_type.register(str)  # type: ignore[no-redef]
 def _(m: ModelField, *args, **kwargs):
-    if m.field_info.max_length:
-        return String(m.field_info.max_length)
     return AutoString
 
 
@@ -276,8 +274,6 @@ def _(m: ModelField, *args, **kwargs):
 
 @get_sql_type.register(bytes)  # type: ignore[no-redef]
 def _(m: ModelField, *args, **kwargs):
-    if m.field_info.max_length:
-        return LargeBinary(m.field_info.max_length)
     return LargeBinary
 
 

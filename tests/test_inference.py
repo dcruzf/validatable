@@ -21,13 +21,16 @@ from pydantic import (
     UUID3,
     UUID4,
     UUID5,
+    AnyHttpUrl,
     BaseModel,
     EmailStr,
     Field,
+    HttpUrl,
     IPvAnyAddress,
     IPvAnyInterface,
     IPvAnyNetwork,
     NameEmail,
+    StrictBool,
     conbytes,
     condecimal,
     confloat,
@@ -57,23 +60,26 @@ class ModelCase(BaseModel):
     uuid4: UUID4
     uuid5: UUID5
     python_int: int
-    con_int: conint(strict=True)  # type: ignore
+    con_int: conint(strict=True)  # type: ignore[valid-type]
     python_float: float
-    con_float: confloat(strict=True)  # type: ignore
+    con_float: confloat(strict=True)  # type: ignore[valid-type]
     python_decimal: Decimal
-    con_decimal: condecimal(max_digits=10)  # type: ignore
+    con_decimal: condecimal(max_digits=10)  # type: ignore[valid-type]
     python_str: str
     python_str_max: str = Field(max_length=MAX_LENGTH)
-    con_str: constr(max_length=MAX_LENGTH)  # type: ignore
-    con_str_curtain: constr(curtail_length=MAX_LENGTH)  # type: ignore
-    con_str_curtain_max: constr(  # type: ignore
+    con_str: constr(max_length=MAX_LENGTH)  # type: ignore[valid-type]
+    con_str_curtain: constr(  # type: ignore[valid-type]
+        curtail_length=MAX_LENGTH
+    )
+    con_str_curtain_max: constr(  # type: ignore[valid-type]
         curtail_length=MAX_LENGTH, max_length=2 * MAX_LENGTH
     )
     email_str: EmailStr
     name_email: NameEmail
     python_bytes: bytes
     python_bytes_max: bytes = Field(max_length=MAX_LENGTH)
-    con_bytes: conbytes(max_length=MAX_LENGTH)  # type: ignore
+    con_bytes: conbytes(max_length=MAX_LENGTH)  # type: ignore[valid-type]
+    con_bytes_no_max: conbytes()  # type: ignore[valid-type]
     python_path: pathlib.Path
     ipv4: IPv4Address
     ipv4i: IPv4Interface
@@ -84,6 +90,8 @@ class ModelCase(BaseModel):
     ipvany: IPvAnyAddress
     ipvanyi: IPvAnyInterface
     ipvanyn: IPvAnyNetwork
+    http_url: HttpUrl
+    any_http_url: AnyHttpUrl
     dt_datetime: dt.datetime
     dt_date: dt.date
     dt_time: dt.time
@@ -95,6 +103,14 @@ class ModelCase(BaseModel):
     sa_column: str = Field(
         sa_column=sa.Column(sa.String(255), nullable=False), max_length=255
     )
+    pbool: bool
+    strict_bool: StrictBool
+    bigint: conint()  # type: ignore[valid-type]
+    bigint_after: conint(  # type: ignore[valid-type]
+        gt=-2147483647, lt=2147483648
+    )
+    sqlint: conint(gt=-2147483648, lt=2147483647)  # type: ignore[valid-type]
+    sqlsmallint: conint(gt=-32768, lt=32767)  # type: ignore[valid-type]
 
 
 def test_column_declaration_with_invalid_name():
@@ -239,12 +255,13 @@ def test_get_column_name_email():
     assert col.type.__class__ == AutoString
 
 
-def test_get_column_python_bytes():
+@pytest.mark.parametrize("field", ["con_bytes_no_max", "python_bytes"])
+def test_get_column_python_bytes(field):
     """
     WHEN called with bytes
     THEN the SqlAlchemy type is LargeBinary
     """
-    python_bytes = ModelCase.__fields__.get("python_bytes")
+    python_bytes = ModelCase.__fields__.get(field)
     col = get_column(python_bytes)
     assert col.type.__class__ == sa.LargeBinary
 
@@ -374,6 +391,35 @@ def test_get_column_uuid(field: str):
     col = get_column(m)  # type: ignore
     assert col.type.__class__ == GUID
     assert col.type.python_type == uuid.UUID
+
+
+@pytest.mark.parametrize("field", ("http_url", "any_http_url"))
+def test_get_column_http_url(field: str):
+    m = ModelCase.__fields__.get(field)
+    col = get_column(m)  # type: ignore
+    assert col.type.__class__ == AutoString
+
+
+@pytest.mark.parametrize("field", ("pbool", "strict_bool"))
+def test_get_column_bool(field: str):
+    m = ModelCase.__fields__.get(field)
+    col = get_column(m)  # type: ignore
+    assert col.type.__class__ == sa.Boolean
+
+
+@pytest.mark.parametrize(
+    ["field", "sql_type"],
+    (
+        ("bigint", sa.BigInteger),
+        ("bigint_after", sa.BigInteger),
+        ("sqlint", sa.Integer),
+        ("sqlsmallint", sa.SmallInteger),
+    ),
+)
+def test_get_column_sql_ints(field: str, sql_type):
+    m = ModelCase.__fields__.get(field)
+    col = get_column(m)  # type: ignore
+    assert col.type.__class__ == sql_type
 
 
 @pytest.mark.parametrize("T", (numbers.Real, ipaddress._IPAddressBase, object))
