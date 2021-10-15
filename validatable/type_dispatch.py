@@ -101,11 +101,12 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
 
     meta_func = dispatch._funcs.get(m.outer_type_.__class__)
 
-    if meta_func is None:
-        return dispatch._base(m)
-    else:
+    if meta_func:
         func = meta_func(m, dispatch=dispatch)
-        return func(m, *args, **kwargs)
+        if func:
+            return func(m, *args, **kwargs)
+
+    return dispatch._base(m)
 
 
 @get_sql_type.register(  # type: ignore[no-redef]
