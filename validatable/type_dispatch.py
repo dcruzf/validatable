@@ -1,13 +1,14 @@
 import datetime as dt
+from functools import partial
 import enum
 import ipaddress
 from decimal import Decimal
 from pathlib import Path
-from typing import Callable
+from typing import Callable, List, Set, Tuple
 from uuid import UUID
 from weakref import WeakKeyDictionary, WeakSet
-
-from pydantic import UUID1, UUID3, UUID4, UUID5
+from .typing import get_type, typing_meta
+from pydantic import UUID1, UUID3, UUID4, UUID5, parse_raw_as
 from pydantic.fields import ModelField
 from pydantic.networks import (
     AnyHttpUrl,
@@ -43,7 +44,6 @@ from pydantic.types import (
     StrictInt,
 )
 from sqlalchemy import (
-    JSON,
     BigInteger,
     Boolean,
     Date,
@@ -59,7 +59,7 @@ from sqlalchemy import (
     Time,
 )
 
-from .generic_types import GUID, AutoString, SLBigInteger
+from .generic_types import GUID, AutoString, SLBigInteger, AutoJson
 
 
 class Dispatch:
@@ -109,8 +109,13 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
     return dispatch._base(m)
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ METACLASS
+
+
 @get_sql_type.register(  # type: ignore[no-redef]
-    ConstrainedNumberMeta, JsonMeta, type
+    ConstrainedNumberMeta,
+    JsonMeta,
+    type,
 )
 def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
     type_ = m.outer_type_
@@ -121,6 +126,15 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
 @get_sql_type.register(enum.EnumMeta)  # type: ignore[no-redef]
 def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
     return dispatch._funcs[enum.Enum]
+
+
+@get_sql_type.register(*typing_meta)  # type: ignore[no-redef]
+def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
+    type_ = get_type(m.outer_type_)
+    return dispatch._funcs[type_]
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TYPES
 
 
 @get_sql_type.register(str)  # type: ignore[no-redef]
@@ -296,9 +310,17 @@ def _(m: ModelField, *args, **kwargs):
 
 @get_sql_type.register(JsonWrapper, Json)  # type: ignore[no-redef]
 def _(m: ModelField, *args, **kwargs):
-    return JSON
+    return AutoJson
 
 
 @get_sql_type.register(bool, StrictBool)  # type: ignore[no-redef]
 def _(m: ModelField, *args, **kwargs):
     return Boolean
+
+
+@get_sql_type.register(  # type: ignore[no-redef]
+    list, List, set, Set, tuple, Tuple
+)
+def _(m: ModelField, *args, **kwargs):
+    loads = partial(parse_raw_as, m.outer_type_)
+    return AutoJson(deserializer=loads)

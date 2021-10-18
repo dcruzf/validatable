@@ -1,6 +1,10 @@
 import uuid
 
 import sqlalchemy as sa
+from typing import Any
+from pydantic.json import pydantic_encoder
+import json
+from functools import partial
 
 
 class SLBigInteger(sa.types.TypeDecorator):
@@ -55,7 +59,7 @@ class GUID(sa.types.TypeDecorator):
 
 class AutoString(sa.types.TypeDecorator):
     """Platform-independent String type.
-    Uses str(value) to bind parametre type.
+    Uses str(value) to bind parameter type.
     """
 
     cache_ok = True
@@ -109,3 +113,43 @@ class AutoString(sa.types.TypeDecorator):
     @property
     def python_type(self):
         return str
+
+
+dumps = partial(json.dumps, default=pydantic_encoder)
+
+
+class AutoJson(sa.types.TypeDecorator):
+    """Json type with serialization"""
+
+    cache_ok = True
+    impl = sa.types.JSON
+
+    @staticmethod
+    def deserializer(v):
+        return v
+
+    def __init__(
+        self,
+        serializer=dumps,
+        deserializer=lambda x: x,
+        python_type=Any,
+        none_as_null=False,
+    ):
+        self.serializer = serializer
+        self.deserializer = deserializer
+        self._python_type = python_type
+
+        super().__init__(none_as_null=none_as_null)
+
+    def load_dialect_impl(self, dialect):
+        return dialect.type_descriptor(self.impl)
+
+    def process_bind_param(self, value, dialect):
+        return self.serializer(value)
+
+    def process_result_value(self, value, dialect):
+        return self.deserializer(value)
+
+    @property
+    def python_type(self):
+        return self._python_type
