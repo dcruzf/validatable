@@ -1,10 +1,11 @@
 import datetime as dt
 from functools import partial
+from collections import deque
 import enum
 import ipaddress
 from decimal import Decimal
 from pathlib import Path
-from typing import Callable, List, Set, Tuple
+from typing import Callable
 from uuid import UUID
 from weakref import WeakKeyDictionary, WeakSet
 from .typing import get_type, typing_meta
@@ -87,8 +88,7 @@ class Dispatch:
 @Dispatch
 def get_sql_type(m: ModelField, *args, **kwargs):
     raise TypeError(
-        "cannot infer sqlalchemy "
-        "type for {}-{}".format(m.type_, m.outer_type_)
+        "cannot infer sqlalchemy " "type for {}".format(m.outer_type_)
     )
 
 
@@ -99,7 +99,7 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
         func = dispatch._funcs.get(m.outer_type_)
         return func(m, *args, **kwargs)
 
-    meta_func = dispatch._funcs.get(m.outer_type_.__class__)
+    meta_func = dispatch._funcs.get(type(m.outer_type_))
 
     if meta_func:
         func = meta_func(m, dispatch=dispatch)
@@ -131,7 +131,9 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
 @get_sql_type.register(*typing_meta)  # type: ignore[no-redef]
 def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
     type_ = get_type(m.outer_type_)
-    return dispatch._funcs[type_]
+    if type_ in dispatch._funcs:
+        return dispatch._funcs[type_]
+    return None
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TYPES
@@ -319,8 +321,12 @@ def _(m: ModelField, *args, **kwargs):
 
 
 @get_sql_type.register(  # type: ignore[no-redef]
-    list, List, set, Set, tuple, Tuple
+    list,
+    set,
+    tuple,
+    deque,
+    # Tuple,  # List, Set,
 )
 def _(m: ModelField, *args, **kwargs):
     loads = partial(parse_raw_as, m.outer_type_)
-    return AutoJson(deserializer=loads)
+    return AutoJson(deserializer=loads, python_type=m.outer_type_)

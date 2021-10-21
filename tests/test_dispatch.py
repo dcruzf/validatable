@@ -2,7 +2,7 @@ import enum
 import uuid
 from decimal import Decimal
 
-from typing import Optional
+from typing import Optional, Dict
 
 import pytest
 from pydantic import (
@@ -30,7 +30,7 @@ from pydantic import (
 from pydantic.fields import ModelField
 from pydantic.types import ConstrainedNumberMeta, JsonMeta
 
-from validatable.type_dispatch import Dispatch
+from validatable.type_dispatch import Dispatch, get_sql_type
 
 
 class CaseEnum(enum.Enum):
@@ -260,3 +260,11 @@ def test_dispatch_types(field, key, dispatch):
         return "decimal"
 
     assert dispatch(m) in key
+
+
+def test_wrong_type():
+    class BaseWrong(BaseModel):
+        test: Dict
+
+    with pytest.raises(TypeError):
+        get_sql_type(BaseWrong.__fields__["test"])

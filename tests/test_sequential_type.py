@@ -1,4 +1,5 @@
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Deque
+from collections import deque
 from validatable import BaseTable, MetaData
 
 
@@ -45,6 +46,21 @@ def test_typing_tuple_type():
 def test_typing_tuple_type_with_subscription():
     class TupleCase(BaseTable, metadata=MetaData()):
         name: Tuple[int]
+
+
+def test_deque_type():
+    class DequeCase(BaseTable, metadata=MetaData()):
+        name: deque
+
+
+def test_typing_deque_type():
+    class DequeCase(BaseTable, metadata=MetaData()):
+        name: Deque
+
+
+def test_typing_deque_with_subscription():
+    class DequeCase(BaseTable, metadata=MetaData()):
+        name: Deque[int]
 
 
 def test_type_tuple(make_conn):
