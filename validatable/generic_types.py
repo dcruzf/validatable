@@ -124,10 +124,6 @@ class AutoJson(sa.types.TypeDecorator):
     cache_ok = True
     impl = sa.types.JSON
 
-    @staticmethod
-    def deserializer(v):
-        return v
-
     def __init__(
         self,
         serializer=dumps,

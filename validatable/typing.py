@@ -7,22 +7,22 @@ if sys.version_info < (3, 7):
     typing_meta = (GenericMeta, TupleMeta)
 
     def get_type(t):
-        return t.mro()[1]
+        return t._gorg.mro()[1]
 
 
 elif sys.version_info < (3, 9):
-    from typing import _GenericAlias
+    from typing import _GenericAlias, _VariadicGenericAlias
 
-    typing_meta = (_GenericAlias,)
+    typing_meta = (_GenericAlias, _VariadicGenericAlias)
 
     def get_type(t):
-        return t.mro()[0]
+        return t.__origin__
 
 
 else:
-    from typing import _GenericAlias, _SpecialGenericAlias
+    from typing import _GenericAlias, _SpecialGenericAlias, _TupleType
 
-    typing_meta = (_GenericAlias, _SpecialGenericAlias)
+    typing_meta = (_GenericAlias, _SpecialGenericAlias, _TupleType)
 
     def get_type(t):
-        return t.mro()[0]
+        return t.__origin__
