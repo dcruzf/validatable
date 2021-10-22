@@ -1,11 +1,11 @@
-from typing import Any, Set, Tuple, List
+from typing import Any, List, Set, Tuple
 from uuid import UUID
 
 import pytest
 from sqlalchemy.dialects import mysql, postgresql, sqlite
 from sqlalchemy.schema import Column, CreateColumn
 
-from validatable.generic_types import GUID, AutoString, SLBigInteger, AutoJson
+from validatable.generic_types import GUID, AutoJson, AutoString, SLBigInteger
 
 
 def test_guid_type_DDL_postgresql():

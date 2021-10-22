@@ -1,8 +1,7 @@
 import enum
 import uuid
 from decimal import Decimal
-
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 import pytest
 from pydantic import (

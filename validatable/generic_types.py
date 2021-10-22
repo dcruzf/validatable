@@ -1,10 +1,10 @@
+import json
 import uuid
+from functools import partial
+from typing import Any
 
 import sqlalchemy as sa
-from typing import Any
 from pydantic.json import pydantic_encoder
-import json
-from functools import partial
 
 
 class SLBigInteger(sa.types.TypeDecorator):
