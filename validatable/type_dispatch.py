@@ -1,14 +1,14 @@
 import datetime as dt
-from functools import partial
-from collections import deque
 import enum
 import ipaddress
+from collections import deque
 from decimal import Decimal
+from functools import partial
 from pathlib import Path
 from typing import Callable
 from uuid import UUID
 from weakref import WeakKeyDictionary, WeakSet
-from .typing import get_type, typing_meta
+
 from pydantic import UUID1, UUID3, UUID4, UUID5, parse_raw_as
 from pydantic.fields import ModelField
 from pydantic.networks import (
@@ -60,7 +60,8 @@ from sqlalchemy import (
     Time,
 )
 
-from .generic_types import GUID, AutoString, SLBigInteger, AutoJson
+from .generic_types import GUID, AutoJson, AutoString, SLBigInteger
+from .typing import get_type, typing_meta
 
 
 class Dispatch:

@@ -1,6 +1,5 @@
 import sys
 
-
 if sys.version_info < (3, 7):
     from typing import GenericMeta, TupleMeta
 
@@ -11,7 +10,8 @@ if sys.version_info < (3, 7):
 
 
 elif sys.version_info < (3, 9):
-    from typing import _GenericAlias, _VariadicGenericAlias
+    from typing import _GenericAlias  # type: ignore[attr-defined]
+    from typing import _VariadicGenericAlias  # type: ignore[attr-defined]
 
     typing_meta = (_GenericAlias, _VariadicGenericAlias)
 
@@ -20,7 +20,9 @@ elif sys.version_info < (3, 9):
 
 
 else:
-    from typing import _GenericAlias, _SpecialGenericAlias, _TupleType
+    from typing import _GenericAlias  # type: ignore[attr-defined]
+    from typing import _SpecialGenericAlias  # type: ignore[attr-defined]
+    from typing import _TupleType  # type: ignore[attr-defined]
 
     typing_meta = (_GenericAlias, _SpecialGenericAlias, _TupleType)
 
