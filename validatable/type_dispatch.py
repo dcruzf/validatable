@@ -1,13 +1,15 @@
 import datetime as dt
 import enum
 import ipaddress
+from collections import deque
 from decimal import Decimal
+from functools import partial
 from pathlib import Path
 from typing import Callable
 from uuid import UUID
 from weakref import WeakKeyDictionary, WeakSet
 
-from pydantic import UUID1, UUID3, UUID4, UUID5
+from pydantic import UUID1, UUID3, UUID4, UUID5, parse_raw_as
 from pydantic.fields import ModelField
 from pydantic.networks import (
     AnyHttpUrl,
@@ -43,7 +45,6 @@ from pydantic.types import (
     StrictInt,
 )
 from sqlalchemy import (
-    JSON,
     BigInteger,
     Boolean,
     Date,
@@ -59,7 +60,8 @@ from sqlalchemy import (
     Time,
 )
 
-from .generic_types import GUID, AutoString, SLBigInteger
+from .generic_types import GUID, AutoJson, AutoString, SLBigInteger
+from .typing import get_type, typing_meta
 
 
 class Dispatch:
@@ -87,8 +89,7 @@ class Dispatch:
 @Dispatch
 def get_sql_type(m: ModelField, *args, **kwargs):
     raise TypeError(
-        "cannot infer sqlalchemy "
-        "type for {}-{}".format(m.type_, m.outer_type_)
+        "cannot infer sqlalchemy " "type for {}".format(m.outer_type_)
     )
 
 
@@ -99,17 +100,23 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
         func = dispatch._funcs.get(m.outer_type_)
         return func(m, *args, **kwargs)
 
-    meta_func = dispatch._funcs.get(m.outer_type_.__class__)
+    meta_func = dispatch._funcs.get(type(m.outer_type_))
 
-    if meta_func is None:
-        return dispatch._base(m)
-    else:
+    if meta_func:
         func = meta_func(m, dispatch=dispatch)
-        return func(m, *args, **kwargs)
+        if func:
+            return func(m, *args, **kwargs)
+
+    return dispatch._base(m)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ METACLASS
 
 
 @get_sql_type.register(  # type: ignore[no-redef]
-    ConstrainedNumberMeta, JsonMeta, type
+    ConstrainedNumberMeta,
+    JsonMeta,
+    type,
 )
 def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
     type_ = m.outer_type_
@@ -120,6 +127,17 @@ def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
 @get_sql_type.register(enum.EnumMeta)  # type: ignore[no-redef]
 def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
     return dispatch._funcs[enum.Enum]
+
+
+@get_sql_type.register(*typing_meta)  # type: ignore[no-redef]
+def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
+    type_ = get_type(m.outer_type_)
+    if type_ in dispatch._funcs:
+        return dispatch._funcs[type_]
+    return None
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TYPES
 
 
 @get_sql_type.register(str)  # type: ignore[no-redef]
@@ -295,9 +313,21 @@ def _(m: ModelField, *args, **kwargs):
 
 @get_sql_type.register(JsonWrapper, Json)  # type: ignore[no-redef]
 def _(m: ModelField, *args, **kwargs):
-    return JSON
+    return AutoJson
 
 
 @get_sql_type.register(bool, StrictBool)  # type: ignore[no-redef]
 def _(m: ModelField, *args, **kwargs):
     return Boolean
+
+
+@get_sql_type.register(  # type: ignore[no-redef]
+    list,
+    set,
+    tuple,
+    deque,
+    # Tuple,  # List, Set,
+)
+def _(m: ModelField, *args, **kwargs):
+    loads = partial(parse_raw_as, m.outer_type_)
+    return AutoJson(deserializer=loads, python_type=m.outer_type_)
