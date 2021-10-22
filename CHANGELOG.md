@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed development status to alpha.
 
+
+## [0.3.0] (2021-10-13)
+
+### Added
+
+- Added support for new types: AnyUrl, HttpAnyUrl, HttpUrl, StrictUrl, bool and StrictBool.
+
+### Changed
+
+- Changed development status to alpha.
+
 ## [0.2.1] (2021-10-03)
 
 ### Fixed
@@ -45,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] (2021-09-23)
 
 - First Release.
+
+
 
 [0.4.0]: https://github.com/dcruzf/validatable/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/dcruzf/validatable/compare/v0.2.1...v0.3.0

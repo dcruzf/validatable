@@ -18,7 +18,6 @@ class SLBigInteger(sa.types.TypeDecorator):
         else:
             return dialect.type_descriptor(sa.BigInteger)
 
-
 class GUID(sa.types.TypeDecorator):
     """Platform-independent GUID type.
     Uses PostgreSQL's UUID type, otherwise uses
