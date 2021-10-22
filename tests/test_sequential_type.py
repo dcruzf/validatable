@@ -1,5 +1,6 @@
-from typing import List, Set, Tuple, Deque
 from collections import deque
+from typing import Deque, List, Set, Tuple
+
 from validatable import BaseTable, MetaData
 
 
