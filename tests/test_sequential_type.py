@@ -71,8 +71,8 @@ def test_type_tuple(make_conn):
         f_sub: Tuple[int, ...] = (1, 2, 3, 4)
 
     instance = Model()
-    create = Model.insert().values(instance.dict())
-    read = Model.select()
+    create = Model.t.insert().values(instance.dict())
+    read = Model.t.select()
     conn = make_conn(Model)
     conn.execute(create)
     result = conn.execute(read)
@@ -88,8 +88,8 @@ def test_type_set(make_conn):
         f_sub: Set[int] = {1, 2, 3, 4}
 
     instance = Model()
-    create = Model.insert().values(instance.dict())
-    read = Model.select()
+    create = Model.t.insert().values(instance.dict())
+    read = Model.t.select()
     conn = make_conn(Model)
     conn.execute(create)
     result = conn.execute(read)
@@ -105,8 +105,8 @@ def test_type_list(make_conn):
         f_sub: List[int] = [1, 2, 3, 4]
 
     instance = Model()
-    create = Model.insert().values(instance.dict())
-    read = Model.select()
+    create = Model.t.insert().values(instance.dict())
+    read = Model.t.select()
     conn = make_conn(Model)
     conn.execute(create)
     result = conn.execute(read)

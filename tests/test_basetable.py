@@ -77,14 +77,16 @@ def test_raise_for_wrong_metadata():
 
 def test_database_update(conn):
     model = ModelUpdateDelete()
-    insert = ModelUpdateDelete.insert().values(model.dict())
+    insert = ModelUpdateDelete.t.insert().values(model.dict())
 
     update = (
-        ModelUpdateDelete.update()
+        ModelUpdateDelete.t.update()
         .where(ModelUpdateDelete.c.id == model.id)
         .values(num=5)
     )
-    one = ModelUpdateDelete.select().where(ModelUpdateDelete.c.id == model.id)
+    one = ModelUpdateDelete.t.select().where(
+        ModelUpdateDelete.c.id == model.id
+    )
 
     conn.execute(insert)
 
@@ -100,11 +102,11 @@ def test_database_update(conn):
 
 def test_database_delete(conn):
     model = ModelUpdateDelete()
-    insert = ModelUpdateDelete.insert().values(model.dict())
-    c = model.c
+    insert = ModelUpdateDelete.t.insert().values(model.dict())
+    c = ModelUpdateDelete.c
 
-    delete = ModelUpdateDelete.delete().where(c.id == model.id)
-    query = ModelUpdateDelete.select()
+    delete = ModelUpdateDelete.t.delete().where(c.id == model.id)
+    query = ModelUpdateDelete.t.select()
 
     conn.execute(insert)
     results = conn.execute(query)
@@ -131,14 +133,16 @@ class RightTable(Base):
 def test_database_join_with_pydantic_model(conn):
 
     left = LeftTable()
-    insert_left = LeftTable.insert().values(left.dict())
+    insert_left = LeftTable.t.insert().values(left.dict())
     conn.execute(insert_left)
 
     right = RightTable(left_id=left.id)
-    insert_right = RightTable.insert().values(right.dict())
+    insert_right = RightTable.t.insert().values(right.dict())
     conn.execute(insert_right)
 
-    join = RightTable.join(LeftTable, LeftTable.c.id == RightTable.c.left_id)
+    join = RightTable.t.join(
+        LeftTable.t, LeftTable.c.id == RightTable.c.left_id
+    )
     query = sa.select([*RightTable.c, *LeftTable.c]).select_from(join)
 
     result_join = conn.execute(query)
@@ -151,15 +155,15 @@ def test_database_join_with_pydantic_model(conn):
 def test_database_join_with_table(conn):
 
     left = LeftTable()
-    insert_left = LeftTable.insert().values(left.dict())
+    insert_left = LeftTable.t.insert().values(left.dict())
     conn.execute(insert_left)
 
     right = RightTable(left_id=left.id)
-    insert_right = RightTable.insert().values(right.dict())
+    insert_right = RightTable.t.insert().values(right.dict())
     conn.execute(insert_right)
 
-    join = RightTable.join(
-        LeftTable.__sa_table__, LeftTable.c.id == RightTable.c.left_id
+    join = RightTable.t.join(
+        LeftTable.t, LeftTable.c.id == RightTable.c.left_id
     )
     query = sa.select([*RightTable.c, *LeftTable.c]).select_from(join)
 
