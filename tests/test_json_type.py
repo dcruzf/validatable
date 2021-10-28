@@ -48,9 +48,9 @@ def test_json_type_db(valid_json):
 
     metadata.create_all(engine)
     with engine.connect() as conn:
-        insert = TableJson.insert().values(model.dict())
+        insert = TableJson.t.insert().values(model.dict())
         conn.execute(insert)
-        result = conn.execute(TableJson.select())
+        result = conn.execute(TableJson.t.select())
         data = result.fetchone()
         m = TableJson.parse_obj(data)
 
@@ -62,7 +62,7 @@ def test_json_type_parameterised():
         id: UUID4 = Field(default_factory=uuid4, sa_primary_key=True)
         json_field: Json[JsonCase]
 
-    assert isinstance(TableJsonWrapper.__sa_table__, sa.Table)
+    assert isinstance(TableJsonWrapper.t, sa.Table)
 
 
 def test_json_type_parameterised_db():
@@ -78,9 +78,9 @@ def test_json_type_parameterised_db():
 
     metadata.create_all(engine)
     with engine.connect() as conn:
-        insert = TableJsonWrapper.insert().values(model.dict())
+        insert = TableJsonWrapper.t.insert().values(model.dict())
         conn.execute(insert)
-        result = conn.execute(TableJsonWrapper.select())
+        result = conn.execute(TableJsonWrapper.t.select())
         data = result.fetchone()
         m = TableJsonWrapper.parse_obj(data)
 
