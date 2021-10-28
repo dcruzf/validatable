@@ -1,11 +1,13 @@
+from random import randint
 import uuid
 
 import pytest
 import sqlalchemy as sa
+from sqlalchemy.sql.schema import MetaData
 from conftest import metadata
 from faker import Faker
 
-from validatable import UUID4, BaseTable, Field
+from validatable import UUID4, BaseTable, Field, Validatable
 
 Faker.seed(0)
 faker = Faker()
@@ -172,3 +174,23 @@ def test_database_join_with_table(conn):
 
     assert data[0][0] == right.id
     assert data[0][2] == left.id
+
+
+def test_inheritance_validatable():
+    class A(Validatable, metadata=MetaData()):
+        id: int = Field(default_factory=lambda: randint(0, 10))
+
+    class B(A):
+        pass
+
+    assert B.t is None
+
+
+def test_inheritance_basemodel():
+    class A(BaseTable, metadata=MetaData()):
+        id: int = Field(default_factory=lambda: randint(0, 10))
+
+    class B(A):
+        pass
+
+    assert B.t is None

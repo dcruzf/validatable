@@ -26,12 +26,15 @@ class ValidatableMetaclass(ModelMetaclass):
     def __prepare__(mcls, name, bases, *, metadata=None, **kwargs):
         """Set metadata before the evaluation of the class body."""
         if isinstance(metadata, MetaData):
-            return {"__sa_metadata__": metadata}
+            return {"__sa_metadata__": metadata, "__create_table__": True}
 
         elif metadata is None:
 
             if bases and hasattr(bases[0], "__sa_metadata__"):
-                return {"__sa_metadata__": bases[0].__sa_metadata__}
+                return {
+                    "__sa_metadata__": bases[0].__sa_metadata__,
+                    "__create_table__": bases[0].__create_table__,
+                }
             else:
                 return {}
 
@@ -47,6 +50,9 @@ class ValidatableMetaclass(ModelMetaclass):
         metadata = namespace.get("__sa_metadata__", None)
         if metadata is None:
             namespace["__sa_metadata__"] = namespace.pop("metadata", None)
+            namespace["__create_table__"] = namespace.get(
+                "__create_table__", True
+            )
             return super().__new__(mcls, name, bases, namespace, **kwargs)
 
         tablename = namespace.get("__sa_tablename__", name.lower())
@@ -62,14 +68,22 @@ class ValidatableMetaclass(ModelMetaclass):
 
         cls = super().__new__(mcls, name, bases, namespace, **kwargs)
 
-        cls.__sa_table__ = get_table(
-            tablename,
-            metadata,
-            cls.__fields__,
-            table_args,
-            table_kwargs,
-            exclude,
-        )
+        if cls.__create_table__:
+            cls.__create_table__ = False
+            cls.__sa_table__ = get_table(
+                tablename,
+                metadata,
+                cls.__fields__,
+                table_args,
+                table_kwargs,
+                exclude,
+            )
+        else:
+            cls.__sa_table__ = None
+            cls.__sa_metadata__ = None
+            cls.__sa_table_args__ = []
+            cls.__sa_table_kwargs__ = {}
+            cls.__sa_exclude__ = None
         return cls
 
     @property
@@ -78,21 +92,31 @@ class ValidatableMetaclass(ModelMetaclass):
         return cls.__sa_table__.c  # type: ignore[attr-defined]
 
     @property
-    def t(cls) -> Table:
+    def t(cls) -> Optional[Table]:
         """Return the table."""
-        return cls.__sa_table__
+        return cls.__sa_table__  # type: ignore[attr-defined]
 
     @property
-    def metadata(cls) -> MetaData:
+    def metadata(cls) -> Optional[MetaData]:
         """Return the metadata instance."""
         return cls.__sa_metadata__  # type: ignore[attr-defined]
 
 
 class BaseTable(BaseModel, metaclass=ValidatableMetaclass):
-    """Extends BaseModel to include SQLAlchemy Table methods."""
+    """Extends BaseModel to include SQLAlchemy Table construction."""
 
-    __sa_table__: Table
-    __sa_metadata__: MetaData
+    __sa_table__: Optional[Table]
+    __sa_metadata__: Optional[MetaData]
+    __sa_table_args__: List[Any]
+    __sa_table_kwargs__: Dict[str, Any]
+    __sa_exclude__: Optional[Set[str]] = None
+
+
+class Validatable(BaseModel, metaclass=ValidatableMetaclass):
+    """Extends BaseModel to include SQLAlchemy Table construction."""
+
+    __sa_table__: Optional[Table]
+    __sa_metadata__: Optional[MetaData]
     __sa_table_args__: List[Any]
     __sa_table_kwargs__: Dict[str, Any]
     __sa_exclude__: Optional[Set[str]] = None

@@ -63,10 +63,11 @@ from sqlalchemy import ForeignKey, MetaData
 
 from .engine import create_engine
 from .fields import Field
-from .main import BaseTable
+from .main import BaseTable, Validatable
 from .version import VERSION
 
 __all__ = [
+    "Validatable",
     "BaseTable",
     "Field",
     "__version__",
