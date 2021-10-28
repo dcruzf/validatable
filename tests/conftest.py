@@ -37,7 +37,7 @@ class MakeConnection(object):
         self.engine = engine
 
     def __call__(self, model):
-        self.metadata = model.__sa_metadata__
+        self.metadata = model.metadata
         self.metadata.create_all(self.engine)
         self.conn = self.engine.connect()
         return self.conn

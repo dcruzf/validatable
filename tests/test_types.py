@@ -120,8 +120,8 @@ def test_factories(Model, instance):
 )
 @pytest.mark.parametrize("Model, instance", params, ids=ids)
 def test_type_(Model: Type[BaseTable], instance: BaseTable, make_conn):
-    create = Model.insert().values(instance.dict())
-    read = Model.select().where(
+    create = Model.t.insert().values(instance.dict())  # type: ignore
+    read = Model.t.select().where(  # type: ignore[union-attr]
         Model.c.test == instance.test  # type: ignore[attr-defined]
     )
     conn = make_conn(Model)

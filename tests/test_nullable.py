@@ -57,8 +57,8 @@ def test_nullable_column_with_pk_integration(make_conn):
 
     data = [NotNull(test=n).dict() for n in (1, 2, 3)]
     conn = make_conn(NotNull)
-    conn.execute(NotNull.insert().values(data))
-    result = conn.execute(NotNull.select())
+    conn.execute(NotNull.t.insert().values(data))
+    result = conn.execute(NotNull.t.select())
     db_data = result.fetchall()
 
     not_nulls = parse_obj_as(List[NotNull], db_data)
@@ -75,8 +75,8 @@ def test_nullable_column_with_pk_integration_sa_nullable_true(make_conn):
 
     data = [NotNull(test=n, id=n).dict() for n in (1, 2, 3)]
     conn = make_conn(NotNull)
-    conn.execute(NotNull.insert().values(data))
-    result = conn.execute(NotNull.select())
+    conn.execute(NotNull.t.insert().values(data))
+    result = conn.execute(NotNull.t.select())
     db_data = result.fetchall()
 
     not_nulls = parse_obj_as(List[NotNull], db_data)

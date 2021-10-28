@@ -1,20 +1,9 @@
-import datetime as dt
 import enum
-import pathlib
 import uuid
 from decimal import Decimal
-from ipaddress import (
-    IPv4Address,
-    IPv4Interface,
-    IPv4Network,
-    IPv6Address,
-    IPv6Interface,
-    IPv6Network,
-)
-from typing import Optional
+from typing import Dict, Optional
 
 import pytest
-import sqlalchemy as sa
 from pydantic import (
     UUID1,
     UUID3,
@@ -24,12 +13,6 @@ from pydantic import (
     ConstrainedDecimal,
     ConstrainedFloat,
     ConstrainedInt,
-    EmailStr,
-    Field,
-    IPvAnyAddress,
-    IPvAnyInterface,
-    IPvAnyNetwork,
-    NameEmail,
     NegativeFloat,
     NegativeInt,
     NonNegativeFloat,
@@ -40,16 +23,13 @@ from pydantic import (
     PositiveInt,
     StrictFloat,
     StrictInt,
-    conbytes,
     condecimal,
-    confloat,
     conint,
-    constr,
 )
 from pydantic.fields import ModelField
 from pydantic.types import ConstrainedNumberMeta, JsonMeta
 
-from validatable.type_dispatch import Dispatch
+from validatable.type_dispatch import Dispatch, get_sql_type
 
 
 class CaseEnum(enum.Enum):
@@ -124,54 +104,6 @@ class ModelCaseTypes(
     ModelCaseUUID, ModelCaseFloat, ModelCaseInt, ModelCaseDecimal
 ):
     ...
-
-
-class ModelCase(BaseModel):
-
-    python_uuid: uuid.UUID
-    uuid1: UUID1
-    uuid3: UUID3
-    uuid4: UUID4
-    uuid5: UUID5
-    python_int: int
-    con_int: conint(strict=True)  # type: ignore
-    python_float: float
-    con_float: confloat(strict=True)  # type: ignore
-    python_decimal: Decimal
-    con_decimal: condecimal(max_digits=10)  # type: ignore
-    python_str: str
-    python_str_max: str = Field(max_length=MAX_LENGTH)
-    con_str: constr(max_length=MAX_LENGTH)  # type: ignore
-    con_str_curtain: constr(curtail_length=MAX_LENGTH)  # type: ignore
-    con_str_curtain_max: constr(  # type: ignore
-        curtail_length=MAX_LENGTH, max_length=2 * MAX_LENGTH
-    )
-    email_str: EmailStr
-    name_email: NameEmail
-    python_bytes: bytes
-    python_bytes_max: bytes = Field(max_length=MAX_LENGTH)
-    con_bytes: conbytes(max_length=MAX_LENGTH)  # type: ignore
-    python_path: pathlib.Path
-    ipv4: IPv4Address
-    ipv4i: IPv4Interface
-    ipv4n: IPv4Network
-    ipv6: IPv6Address
-    ipv6i: IPv6Interface
-    ipv6n: IPv6Network
-    ipvany: IPvAnyAddress
-    ipvanyi: IPvAnyInterface
-    ipvanyn: IPvAnyNetwork
-    dt_datetime: dt.datetime
-    dt_date: dt.date
-    dt_time: dt.time
-    dt_timedelta: dt.timedelta
-    enum_field: CaseEnum
-    name: int = Field(sa_column=sa.Column("not_valid", sa.Integer))
-
-    sa_type: Decimal = Field(sa_type=sa.DECIMAL(precision=10))
-    sa_column: str = Field(
-        sa_column=sa.Column(sa.String(255), nullable=False), max_length=255
-    )
 
 
 @pytest.fixture(scope="function")
@@ -327,3 +259,11 @@ def test_dispatch_types(field, key, dispatch):
         return "decimal"
 
     assert dispatch(m) in key
+
+
+def test_wrong_type():
+    class BaseWrong(BaseModel):
+        test: Dict
+
+    with pytest.raises(TypeError):
+        get_sql_type(BaseWrong.__fields__["test"])
