@@ -1,13 +1,12 @@
-from random import randint
 import uuid
+from random import randint
 
 import pytest
 import sqlalchemy as sa
-from sqlalchemy.sql.schema import MetaData
 from conftest import metadata
 from faker import Faker
 
-from validatable import UUID4, BaseTable, Field, Validatable
+from validatable import UUID4, BaseTable, Field, MetaData, Validatable
 
 Faker.seed(0)
 faker = Faker()
