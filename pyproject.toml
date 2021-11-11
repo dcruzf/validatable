@@ -14,7 +14,7 @@ omit = []
 dynamic_context = "test_function"
 
 [tool.coverage.paths]
-source = ["validatable/", "/Users/runner/work/*"]
+source = ["validatable/", "/Users/runner/work/validatable/validatable/validatable/"]
 
 [tool.coverage.report]
 exclude_lines = ["if TYPE_CHECKING:"]
