@@ -23,7 +23,7 @@ class ValidatableMetaclass(ModelMetaclass):
     """Extends ModelMetaclass to include SQLAlchemy Table logic."""
 
     @classmethod
-    def __prepare__(mcls, name, bases, *, metadata=None, **kwargs):
+    def __prepare__(mcls, name, bases, *, metadata=None, **kwargs):  # type: ignore[no-untyped-def] # noqa: E501
         """Set metadata before the evaluation of the class body."""
         if isinstance(metadata, MetaData):
             return {"__sa_metadata__": metadata, "__create_table__": True}
@@ -41,7 +41,7 @@ class ValidatableMetaclass(ModelMetaclass):
         else:
             raise TypeError("metadata must be a sqlalquemy metadata")
 
-    def __new__(mcls, name, bases, namespace, metadata=None, **kwargs):
+    def __new__(mcls, name, bases, namespace, metadata=None, **kwargs):  # type: ignore[no-untyped-def] # noqa: E501
         """Control the BaseTable definition."""
         table = namespace.get("__sa_table__")
         if isinstance(table, Table):
@@ -87,7 +87,7 @@ class ValidatableMetaclass(ModelMetaclass):
         return cls
 
     @property
-    def c(cls) -> ImmutableColumnCollection:
+    def c(cls) -> ImmutableColumnCollection:  # type: ignore[type-arg]
         """Return the collection of columns."""
         return cls.__sa_table__.c  # type: ignore[attr-defined]
 

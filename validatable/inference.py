@@ -6,7 +6,7 @@ from pydantic.fields import ModelField, UndefinedType
 from .type_dispatch import get_sql_type
 
 
-def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
+def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:  # type: ignore[type-arg] # noqa: E501
     if column.name == column_name:
         return column
 
@@ -19,14 +19,14 @@ def prepare_column_name(column: sa.Column, column_name: str) -> sa.Column:
     )
 
 
-def primary_key_kwargs(col_kwargs: Dict[str, Any]):
+def primary_key_kwargs(col_kwargs: Dict[str, Any]) -> bool:
     pk = col_kwargs.pop("pk", False)
     return col_kwargs.get("primary_key") or pk
 
 
 def nullable_kwargs(
     col_kwargs: Dict[str, Any], required: Union[bool, UndefinedType], pk: bool
-):
+) -> Optional[bool]:
     nullable = col_kwargs.get("nullable")
     if pk:
         return nullable
@@ -50,7 +50,7 @@ def get_sa_args_kwargs(m: ModelField) -> Tuple[Any, Dict[str, Any]]:
     return args, col_kwargs
 
 
-def get_column(m: ModelField) -> sa.Column:
+def get_column(m: ModelField) -> sa.Column:  # type: ignore[type-arg] # noqa: E501
     args, col_kwargs = get_sa_args_kwargs(m)
     column = col_kwargs.pop("column", None)
 

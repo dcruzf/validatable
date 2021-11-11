@@ -5,7 +5,7 @@ from collections import deque
 from decimal import Decimal
 from functools import partial
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable, NoReturn
 from uuid import UUID
 from weakref import WeakKeyDictionary, WeakSet
 
@@ -61,40 +61,41 @@ from sqlalchemy import (
 )
 
 from .generic_types import GUID, AutoJson, AutoString, SLBigInteger
-from .typing import get_type, typing_meta
+from .typing import get_type, typing_meta  # type: ignore[attr-defined]
 
 
 class Dispatch:
-    def __init__(self, base: Callable):
+    def __init__(self, base: Callable[..., NoReturn]) -> None:
         self._base = base
-        self._funcs: WeakKeyDictionary = WeakKeyDictionary()
+        self._funcs: WeakKeyDictionary[
+            Any, Callable[..., Any]
+        ] = WeakKeyDictionary()
 
-    def dispatcher(self, func: Callable):
+    def dispatcher(self, func: Callable[..., Any]) -> None:
         self._dispatcher = func
 
-    def register(self, *args):
+    def register(self, *args: Any) -> Callable[..., Any]:
         self._types = WeakSet(args)
         return self.wrapper
 
-    def wrapper(self, func):
+    def wrapper(self, func: Callable[..., Any]) -> None:
         for t in self._types:
             self._funcs[t] = func
         self._types.clear()
 
-    def __call__(self, *args, **kwargs):
-
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self._dispatcher(*args, dispatch=self, **kwargs)
 
 
 @Dispatch
-def get_sql_type(m: ModelField, *args, **kwargs):
+def get_sql_type(m: ModelField, *args: Any, **kwargs: Any) -> NoReturn:
     raise TypeError(
         "cannot infer sqlalchemy " "type for {}".format(m.outer_type_)
     )
 
 
 @get_sql_type.dispatcher
-def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs):
+def _(m: ModelField, *args, dispatch: Dispatch = None, **kwargs) -> Any:
 
     if m.outer_type_ in dispatch._funcs:
         func = dispatch._funcs.get(m.outer_type_)
