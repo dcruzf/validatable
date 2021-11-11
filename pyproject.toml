@@ -2,7 +2,6 @@
 minversion = "6.0"
 addopts = "-ra"
 testpaths = ["tests"]
-markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
 
 [tool.black]
 line-length = 79
@@ -16,6 +15,9 @@ dynamic_context = "test_function"
 
 [tool.coverage.paths]
 source = ["validatable/", "/Users/runner/work/*"]
+
+[tool.coverage.report]
+exclude_lines = ["if TYPE_CHECKING:"]
 
 [tool.isort]
 profile = "black"
