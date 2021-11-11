@@ -61,7 +61,8 @@ from sqlalchemy import (
 )
 
 from .generic_types import GUID, AutoJson, AutoString, SLBigInteger
-from .typing import get_type, typing_meta  # type: ignore[attr-defined]
+from .typing import typing_meta  # type: ignore[attr-defined]
+from .typing import get_type
 
 
 class Dispatch:

@@ -24,6 +24,7 @@ setup(
     author_email="dcruzf.py@gmail.com",
     url="https://github.com/dcruzf/validatable",
     packages=["validatable"],
+    package_data={"pydantic": ["py.typed"]},
     license="MIT",
     python_requires=">=3.6.1",
     install_requires=["pydantic>=1.8", "sqlalchemy>=1.3", "sqlalchemy2-stubs"],
